@@ -1,1 +1,18 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Build & Cache Output
+dist/
+.tanstack/
+.output/
+
+# Environment Variables & Secret Credentials
+.env
+.env.local
+.env.*.local
+.agents/mcp_config.json
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+
