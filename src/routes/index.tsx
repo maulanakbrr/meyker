@@ -152,6 +152,12 @@ function DashboardPage() {
 
   // Fetch Supabase Auth User & Sync DB Data
   useEffect(() => {
+    // If this window is an OAuth popup callback, auto-close it after redirecting back
+    if (window.opener && window.opener !== window) {
+      window.close()
+      return
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoadingAuth(false)

@@ -6,13 +6,33 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_KEY || import.meta.env.VIT
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export async function signInWithGoogle() {
+  const width = 500
+  const height = 600
+  const left = window.screenX + (window.outerWidth - width) / 2
+  const top = window.screenY + (window.outerHeight - height) / 2
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: `${window.location.origin}`,
+      skipBrowserRedirect: true,
     },
   })
   if (error) throw error
+
+  if (data?.url) {
+    const popup = window.open(
+      data.url,
+      'google-oauth-popup',
+      `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,status=yes`
+    )
+    if (popup) {
+      popup.focus()
+    } else {
+      // Fallback if browser popup blocker prevents opening popup
+      window.location.href = data.url
+    }
+  }
   return data
 }
 
