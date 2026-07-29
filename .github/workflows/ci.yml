@@ -24,6 +24,9 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Unit Tests Execution
+        run: npm test
+
       - name: TypeScript Type-Check
         run: npm run check
 
