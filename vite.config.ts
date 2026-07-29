@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
@@ -15,9 +16,15 @@ export default defineConfig({
     },
   },
   plugins: [
-    tanstackStart(),
+    !process.env.VITEST && tanstackStart(),
     tailwindcss(),
     // react's vite plugin must come after start's vite plugin
     viteReact(),
-  ],
+  ].filter(Boolean),
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    pool: 'forks',
+  },
 })

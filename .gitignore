@@ -16,3 +16,7 @@ dist/
 *.log
 npm-debug.log*
 
+# Test Reports & Coverage Output
+html/
+coverage/
+
