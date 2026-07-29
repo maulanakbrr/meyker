@@ -8,4 +8,11 @@ if (typeof window !== 'undefined') {
 
   // Mock HTMLAnchorElement click method if needed
   HTMLAnchorElement.prototype.click = vi.fn()
+
+  // Mock ResizeObserver for Recharts / layout components
+  window.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
 }
