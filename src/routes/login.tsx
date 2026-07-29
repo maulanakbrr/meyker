@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { AuthHeader } from '../components/auth/auth-header'
 import { LoginForm } from '../components/auth/login-form'
@@ -11,6 +12,12 @@ export const Route = createFileRoute('/login')({
 
 export function LoginPage() {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    if (window.opener && window.opener !== window) {
+      window.close()
+    }
+  }, [])
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#0b0f19] relative overflow-hidden">
