@@ -5,9 +5,9 @@ This document tracks future feature ideas and roadmap items to ensure **Phase 1 
 ---
 
 ## 🚀 Phase 2: WhatsApp & AI Automation
-- [ ] **Twilio WhatsApp Integration**: Receive incoming webhook messages from Twilio Messaging API.
+- [ ] **WhatsApp Webhook Gateway (Twilio Dev / Qiscus Prod)**: Receive incoming webhook text and media payloads.
 - [ ] **Text Natural Language Parser**: Parse expense messages such as `"50k lunch #food"` or `"1.5m invoice #income"`.
-- [ ] **OpenAI Vision OCR**: Process uploaded receipt images and bank transfer screenshots with GPT-4o-mini.
+- [ ] **Google Gemini Flash Vision OCR**: Process uploaded receipt images and bank transfer screenshots with `gemini-1.5-flash` / `gemini-2.0-flash`.
 - [ ] **WhatsApp Confirmation Replies**: Send automated WhatsApp response confirming entry logged.
 
 ---
