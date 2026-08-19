@@ -20,14 +20,21 @@ export const paymentMethodEnum = pgEnum('payment_method', [
 ])
 
 // Profiles table (linked to auth.users)
-export const profiles = pgTable('profiles', {
-  id: uuid('id').primaryKey(), // maps to auth.users.id
-  email: text('email').notNull(),
-  fullName: text('full_name'),
-  avatarUrl: text('avatar_url'),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-})
+export const profiles = pgTable(
+  'profiles',
+  {
+    id: uuid('id').primaryKey(), // maps to auth.users.id
+    email: text('email').notNull(),
+    fullName: text('full_name'),
+    avatarUrl: text('avatar_url'),
+    phoneNumber: text('phone_number').unique(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_profiles_phone').on(table.phoneNumber),
+  ]
+)
 
 // Categories table (global defaults have null user_id)
 export const categories = pgTable(

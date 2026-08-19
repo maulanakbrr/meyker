@@ -1,4 +1,4 @@
-import { Search, Tag, Trash2 } from 'lucide-react'
+import { Search, Tag, Trash2, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
 import type { Transaction, Category } from '../../types'
 
@@ -138,9 +138,15 @@ export function TransactionList({
                     <span className="text-gray-400 capitalize">{tx.paymentMethod.replace('_', ' ')}</span>
                   </td>
                   <td className="py-3.5 px-4">
-                    <span className="text-[10px] uppercase font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
-                      {tx.source}
-                    </span>
+                    {tx.source === 'WHATSAPP' ? (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                        <MessageSquare className="w-3 h-3" /> WHATSAPP
+                      </span>
+                    ) : (
+                      <span className="text-[10px] uppercase font-bold text-indigo-300 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                        {tx.source}
+                      </span>
+                    )}
                   </td>
                   <td
                     className={`py-3.5 px-4 text-right font-bold text-sm ${

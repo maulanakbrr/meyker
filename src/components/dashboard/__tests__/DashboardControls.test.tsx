@@ -12,6 +12,7 @@ describe('DashboardControls', () => {
         onOpenCategoryModal={vi.fn()}
         onOpenExportModal={vi.fn()}
         onOpenAddTxModal={vi.fn()}
+        onOpenWhatsAppModal={vi.fn()}
       />
     )
 
@@ -27,6 +28,8 @@ describe('DashboardControls', () => {
     const handleOpenExport = vi.fn()
     const handleOpenAddTx = vi.fn()
 
+    const handleOpenWhatsApp = vi.fn()
+
     render(
       <DashboardControls
         selectedMonth="2026-07"
@@ -34,8 +37,12 @@ describe('DashboardControls', () => {
         onOpenCategoryModal={handleOpenCat}
         onOpenExportModal={handleOpenExport}
         onOpenAddTxModal={handleOpenAddTx}
+        onOpenWhatsAppModal={handleOpenWhatsApp}
       />
     )
+
+    fireEvent.click(screen.getByRole('button', { name: /whatsapp ai/i }))
+    expect(handleOpenWhatsApp).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByRole('button', { name: /categories/i }))
     expect(handleOpenCat).toHaveBeenCalledTimes(1)
