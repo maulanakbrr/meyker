@@ -26,10 +26,12 @@ export function useDashboard() {
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL')
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL')
 
-  // Modals State
+  // Profile & Modal State
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string | null>(null)
   const [showAddTxModal, setShowAddTxModal] = useState(false)
   const [showCatModal, setShowCatModal] = useState(false)
   const [showExportModal, setShowExportModal] = useState(false)
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
 
   // Form State - New Transaction
   const [txAmount, setTxAmount] = useState('')
@@ -46,10 +48,46 @@ export function useDashboard() {
 
   // Fetch Supabase Auth User & Sync DB Data
   useEffect(() => {
-    // If this window is an OAuth popup callback, auto-close it after redirecting back
+    // If this window is an OAuth popup callback, wait for Supabase session exchange before closing popup
     if (window.opener && window.opener !== window) {
-      window.close()
-      return
+      let isClosed = false
+      const notifyAndClose = () => {
+        if (isClosed) return
+        isClosed = true
+        try {
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage({ type: 'MEYKER_OAUTH_SUCCESS' }, window.location.origin)
+          }
+        } catch (e) {
+          // ignore cross-origin errors
+        }
+        setTimeout(() => {
+          try {
+            window.close()
+          } catch (e) {}
+        }, 300)
+      }
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          notifyAndClose()
+        }
+      })
+
+      const { data: popupListener } = supabase.auth.onAuthStateChange((event, session) => {
+        if (session || event === 'SIGNED_IN') {
+          notifyAndClose()
+        }
+      })
+
+      const timer = setTimeout(() => {
+        notifyAndClose()
+      }, 3500)
+
+      return () => {
+        popupListener.subscription.unsubscribe()
+        clearTimeout(timer)
+      }
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -63,47 +101,106 @@ export function useDashboard() {
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      setLoadingAuth(false)
       if (session?.user) {
         fetchUserData(session.user.id)
       }
     })
 
-    return () => authListener.subscription.unsubscribe()
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'MEYKER_OAUTH_SUCCESS') {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session?.user) {
+            setUser(session.user)
+            fetchUserData(session.user.id)
+          }
+        })
+      }
+    }
+    window.addEventListener('message', handleMessage)
+
+    return () => {
+      authListener.subscription.unsubscribe()
+      window.removeEventListener('message', handleMessage)
+    }
   }, [])
 
   const fetchUserData = async (userId: string) => {
     try {
+      // Fetch Profile Phone Number
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('phone_number')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (profileData) {
+        setUserPhoneNumber(profileData.phone_number)
+      }
+
       // Fetch Categories
-      const { data: catData } = await supabase
+      const { data: catData, error: catErr } = await supabase
         .from('categories')
         .select('*')
         .or(`user_id.is.null,user_id.eq.${userId}`)
 
+      if (catErr) {
+        console.error('[Dashboard DB Error] Failed to fetch categories:', catErr.message || catErr)
+      }
+
+      let loadedCategories: Category[] = []
       if (catData && catData.length > 0) {
-        setCategories(
-          catData.map((c: any) => ({
-            id: c.id,
-            userId: c.user_id,
-            name: c.name,
-            type: c.type,
-            icon: c.icon,
-            color: c.color,
-            isDefault: c.is_default,
-          }))
-        )
+        loadedCategories = catData.map((c: any) => ({
+          id: c.id,
+          userId: c.user_id,
+          name: c.name,
+          type: c.type,
+          icon: c.icon,
+          color: c.color,
+          isDefault: c.is_default,
+        }))
+        setCategories(loadedCategories)
       }
 
       // Fetch Transactions
-      const { data: txData } = await supabase
+      let { data: txData, error: txErr } = await supabase
         .from('transactions')
         .select('*, categories(*)')
         .eq('user_id', userId)
         .order('transaction_date', { ascending: false })
 
-      if (txData) {
+      // Fallback if joined query fails due to missing relationship definition in DB
+      if (txErr) {
+        console.warn('[Dashboard DB Warning] Joined query failed, retrying plain transactions query:', txErr.message || txErr)
+        const fallbackRes = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('transaction_date', { ascending: false })
+
+        if (fallbackRes.error) {
+          console.error('[Dashboard DB Error] Failed to fetch transactions:', fallbackRes.error.message || fallbackRes.error)
+        } else {
+          txData = fallbackRes.data
+          txErr = null
+        }
+      }
+
+      if (txData && !txErr) {
         setTransactions(
           txData.map((t: any) => {
             const rawCat = Array.isArray(t.categories) ? t.categories[0] : t.categories
+            const matchedCat = rawCat
+              ? {
+                  id: rawCat.id,
+                  name: rawCat.name,
+                  type: rawCat.type,
+                  icon: rawCat.icon,
+                  color: rawCat.color,
+                  isDefault: rawCat.is_default,
+                }
+              : loadedCategories.find((c) => c.id === t.category_id) || null
+
             return {
               id: t.id,
               userId: t.user_id,
@@ -114,22 +211,13 @@ export function useDashboard() {
               paymentMethod: t.payment_method,
               note: t.note,
               source: t.source,
-              category: rawCat
-                ? {
-                    id: rawCat.id,
-                    name: rawCat.name,
-                    type: rawCat.type,
-                    icon: rawCat.icon,
-                    color: rawCat.color,
-                    isDefault: rawCat.is_default,
-                  }
-                : null,
+              category: matchedCat,
             }
           })
         )
       }
     } catch (err) {
-      console.warn('Using local state context for dashboard preview:', err)
+      console.error('[Dashboard Fetch Error]', err)
     }
   }
 
@@ -333,6 +421,10 @@ export function useDashboard() {
     setShowCatModal,
     showExportModal,
     setShowExportModal,
+    showWhatsAppModal,
+    setShowWhatsAppModal,
+    userPhoneNumber,
+    setUserPhoneNumber,
 
     // Add Transaction Form State
     txAmount,

@@ -1,4 +1,4 @@
-import { Calendar, Tag, Download, Plus } from 'lucide-react'
+import { Calendar, Tag, Download, Plus, MessageSquare } from 'lucide-react'
 
 interface DashboardControlsProps {
   selectedMonth: string
@@ -6,6 +6,7 @@ interface DashboardControlsProps {
   onOpenCategoryModal: () => void
   onOpenExportModal: () => void
   onOpenAddTxModal: () => void
+  onOpenWhatsAppModal: () => void
 }
 
 export function DashboardControls({
@@ -14,6 +15,7 @@ export function DashboardControls({
   onOpenCategoryModal,
   onOpenExportModal,
   onOpenAddTxModal,
+  onOpenWhatsAppModal,
 }: DashboardControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
@@ -32,6 +34,13 @@ export function DashboardControls({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={onOpenWhatsAppModal}
+          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"
+        >
+          <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> WhatsApp AI
+        </button>
+
         <button
           onClick={onOpenCategoryModal}
           className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border border-gray-700/60 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"

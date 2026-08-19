@@ -61,4 +61,5 @@ export interface UserProfile {
   email: string
   fullName?: string
   avatarUrl?: string
+  phoneNumber?: string | null
 }

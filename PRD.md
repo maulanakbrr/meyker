@@ -38,13 +38,14 @@
   - Clean CSV export generation for raw data analysis.
 
 ### Phase 2: WhatsApp AI Automation (Future Roadmap)
-- **WhatsApp Text Logger**:
-  - Twilio Messaging API webhook integration for text inputs like `"50k lunch #food"` or `"1.5m salary #income"`.
+- **WhatsApp Gateway & Adapter**:
+  - Twilio WhatsApp Messaging API integration for development/sandbox testing.
+  - Qiscus Multichannel API support as local IDR production gateway option.
 - **OCR Vision AI Scanning**:
-  - Receipt images and bank transfer screenshots scanning using OpenAI Vision (GPT-4o-mini).
-  - Automatic merchant, date, amount, and category extraction.
+  - Receipt images, QRIS receipts, and bank transfer screenshots scanning using **Google Gemini 1.5 / 2.0 Flash Vision AI** (`@google/genai`).
+  - Automatic merchant, date, amount, payment method, and category JSON extraction.
 - **Real-time DB Synchronization**:
-  - WhatsApp confirmation replies and instant DB updates.
+  - Instant Supabase DB entry logging (`source = 'WHATSAPP'`) and WhatsApp TwiML/Qiscus confirmation reply.
 
 ### Phase 3: Imports, Advanced Sync & Reports (Future Roadmap)
 - **File Import Engine**:

@@ -5,6 +5,26 @@ All notable changes to the **Meyker Financial Tracker** project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-08-19
+
+### 🎉 Added (Phase 2: WhatsApp & AI Vision OCR)
+- **WhatsApp Webhook Gateway & Adapter**:
+  - Webhook handlers for Twilio (dev/sandbox TwiML XML) and Qiscus (IDR production JSON).
+  - E.164 phone number normalization (`+628...`, `628...`, `08...`) and user profile lookup.
+  - Automated WhatsApp confirmation response formatting (`formatTransactionConfirmationReply`).
+- **Google Gemini Flash Vision AI OCR**:
+  - Receipt image and bank transfer screenshot parsing using `@google/genai` with model fallback cascade (`gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-1.5-pro`).
+  - Google Cloud Vision API & offline Tesseract.js fallbacks for rate-limit resilience.
+- **Natural Language WhatsApp Text Parser**:
+  - Intelligent parsing of shorthand currency values (`50k`, `1.5m`, `50rb`), hashtags (`#food`), income/expense classification, and payment method mapping.
+- **Popup OAuth Modal & Database Fetch Fallbacks**:
+  - Refined Google OAuth popup window session exchange with `postMessage` cross-frame notification.
+  - Automatic DB query fallbacks and explicit developer error logging for Supabase category joins.
+- **WhatsApp Account Settings UI**:
+  - Account WhatsApp phone number configuration modal (`WhatsAppSettingsModal.tsx`).
+- **Extended Test Suite**:
+  - Added unit test suites covering OCR vision fallbacks, WhatsApp NL parser, and webhook handler (53 passing unit tests across 15 test files).
+
 ---
 
 ## [0.1.0] - 2026-07-29

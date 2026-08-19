@@ -12,6 +12,7 @@ import { TransactionList } from '../components/dashboard/TransactionList'
 import { AddTransactionModal } from '../components/dashboard/AddTransactionModal'
 import { CategoryManagementModal } from '../components/dashboard/CategoryManagementModal'
 import { ExportModal } from '../components/dashboard/ExportModal'
+import { WhatsAppSettingsModal } from '../components/dashboard/WhatsAppSettingsModal'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -55,6 +56,7 @@ function DashboardPage() {
           onOpenCategoryModal={() => dashboard.setShowCatModal(true)}
           onOpenExportModal={() => dashboard.setShowExportModal(true)}
           onOpenAddTxModal={() => dashboard.setShowAddTxModal(true)}
+          onOpenWhatsAppModal={() => dashboard.setShowWhatsAppModal(true)}
         />
 
         {/* 3 Summary Stat Cards */}
@@ -125,6 +127,14 @@ function DashboardPage() {
           exportToCSV(dashboard.filteredTransactions)
           dashboard.setShowExportModal(false)
         }}
+      />
+
+      <WhatsAppSettingsModal
+        isOpen={dashboard.showWhatsAppModal}
+        onClose={() => dashboard.setShowWhatsAppModal(false)}
+        currentPhoneNumber={dashboard.userPhoneNumber}
+        userId={dashboard.user.id}
+        onPhoneUpdated={(newPhone) => dashboard.setUserPhoneNumber(newPhone)}
       />
     </div>
   )

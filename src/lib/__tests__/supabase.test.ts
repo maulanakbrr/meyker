@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { supabase, signInWithEmail, signUpWithEmail, signOut } from '../supabase'
+import { supabase, signInWithEmail, signUpWithEmail, signInWithGoogle, signOut } from '../supabase'
 
 vi.mock('@supabase/supabase-js', () => {
   const mockAuth = {
@@ -23,6 +23,27 @@ describe('Supabase Client & Auth Helpers Module', () => {
   it('exports a valid Supabase client instance', () => {
     expect(supabase).toBeDefined()
     expect(supabase.auth).toBeDefined()
+  })
+
+  describe('signInWithGoogle', () => {
+    it('calls signInWithOAuth with google provider and current location origin', async () => {
+      const mockResult = { provider: 'google', url: 'https://accounts.google.com' }
+      vi.mocked(supabase.auth.signInWithOAuth).mockResolvedValueOnce({
+        data: mockResult,
+        error: null,
+      } as any)
+
+      const result = await signInWithGoogle()
+
+      expect(supabase.auth.signInWithOAuth).toHaveBeenCalledWith({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+          skipBrowserRedirect: true,
+        },
+      })
+      expect(result).toEqual(mockResult)
+    })
   })
 
   describe('signInWithEmail', () => {
