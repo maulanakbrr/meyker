@@ -60,7 +60,7 @@
 ---
 
 ## 4. Scope Guardrails & Backlog Management
-- All feature ideas outside Phase 1 scope are maintained in [`BACKLOG.md`](file:///d:/projs/apps/meyker/BACKLOG.md) to prevent scope creep during Phase 1 development.
+- All feature ideas outside current scope are maintained in [`BACKLOG.md`](file:///d:/projs/apps/meyker/docs/BACKLOG.md) to prevent scope creep.
 
 ---
 

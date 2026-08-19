@@ -33,8 +33,16 @@ It empowers individuals, freelancers, and small business owners to track income 
   - **Excel (`.xlsx`) Export**: Professionally formatted spreadsheets using **ExcelJS** complete with headers, number formatting, and formula totals.
   - **CSV Export**: Clean CSV download for spreadsheet tools and raw data analysis.
 
+- **🤖 WhatsApp AI & Vision OCR Automation**:
+  - Instant transaction logging via WhatsApp text messages (e.g. `"50k lunch #food"` or `"1.5m invoice #income"`).
+  - Multi-tier OCR Vision Pipeline for receipt images & bank transfer screenshots:
+    1. **Primary**: Google Gemini 1.5/2.0 Flash Vision AI (`@google/genai`).
+    2. **Fallback #1**: Google Cloud Vision API (`@google-cloud/vision`).
+    3. **Fallback #2**: Local offline Tesseract.js engine (`ind.traineddata` & `eng.traineddata`).
+  - Automated WhatsApp confirmation replies with transaction summaries and fallback tips.
+
 - **🧪 Unit Testing & Quality Assurance**:
-  - Full Vitest test suite covering calculation utilities, export engine, Supabase integration, UI components, and routes.
+  - Full Vitest test suite covering calculation utilities, export engine, Supabase integration, OCR vision fallbacks, WhatsApp NL parser, UI components, and routes (53 passing tests).
 
 ---
 
@@ -105,46 +113,66 @@ It empowers individuals, freelancers, and small business owners to track income 
 
 ```text
 meyker/
-├── src/
+├── docs/                 # Project documentation & specs
+│   ├── PRD.md            # Product Requirement Document
+│   ├── BACKLOG.md        # Feature backlog & scope guardrails
+│   └── CHANGELOG.md      # Version release history
+├── src/                  # Application source code
 │   ├── components/       # Reusable UI & modular dashboard components
 │   │   ├── auth/         # Login & registration components
 │   │   ├── dashboard/    # Header, Controls, StatCards, Charts, TransactionList, Modals
 │   │   └── ui/           # Basic layout primitives (Card, Button, Divider)
 │   ├── db/               # Drizzle ORM database schema & default categories
 │   ├── hooks/            # Custom React hooks (useDashboard state & CRUD handlers)
-│   ├── lib/              # Utility functions, export engine, Supabase client
+│   ├── lib/              # Utility functions, OCR vision, export engine, Supabase client
 │   │   ├── dashboardUtils.ts   # Metric computations, aggregations & filtering
 │   │   ├── export.ts           # ExcelJS & CSV generator logic
-│   │   ├── mockData.ts         # Fallback preview dataset
+│   │   ├── geminiOcr.ts        # Gemini Flash Vision AI OCR & Tesseract fallback
 │   │   ├── supabase.ts         # Supabase client & auth helpers
-│   │   └── utils.ts            # Currency formatters & general helpers
+│   │   ├── whatsappAdapter.ts  # Twilio & Qiscus WhatsApp payload parser
+│   │   └── whatsappWebhookService.ts # WhatsApp transaction webhook handler
 │   ├── routes/           # TanStack file-based router entries (index, login, auth)
-│   ├── test/             # Vitest test setup and global mocks
 │   └── types/            # TypeScript interface definitions (Transaction, Category, etc.)
-├── PRD.md                # Product Requirement Document
-├── BACKLOG.md            # Roadmap scope guardrails
-└── vite.config.ts        # Vite & Vitest configuration
+├── README.md             # Repository overview & setup instructions
+└── vite.config.ts        # Vite, Vitest & WhatsApp webhook middleware config
 ```
 
 ---
 
 ## 🗺️ Product Roadmap
 
-- **✅ Phase 1: Core Web MVP (Current)**:
+- **✅ Phase 1: Core Web MVP (Completed)**:
   - Supabase Auth (Email & Google OAuth)
   - Category Management & Transaction Logging
   - Financial Dashboard (KPI Cards, Pie & Bar Charts)
   - Search, Filter, and Excel/CSV Export
   - Modular refactoring & unit testing suite
 
-- **⏳ Phase 2: WhatsApp AI Automation (Upcoming)**:
-  - Twilio WhatsApp webhook integration for instant text expense logging
-  - Receipt image scanning & OCR parsing via OpenAI Vision (GPT-4o-mini)
+- **✅ Phase 2: WhatsApp AI & Vision OCR (Completed)**:
+  - Twilio & Qiscus WhatsApp webhook adapters
+  - Google Gemini Flash Vision AI OCR (`gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`)
+  - Multi-engine OCR fallback (Google Cloud Vision & local Tesseract.js)
+  - Natural Language text expense parser (`"50k lunch #food"`)
 
-- **⏳ Phase 3: Advanced Sync & Reports**:
+- **⏳ Phase 3: Advanced Sync & Reports (Upcoming)**:
   - Bank statement CSV/Excel bulk import UI
   - Automated PDF monthly financial statements
   - Live two-way sync with Google Sheets API
+
+---
+
+## 💡 Technical Notes: OCR Pipeline & Rate Limits
+
+1. **Gemini Free-Tier Rate Limits (15 RPM)**:
+   * Google AI Studio free tier limits requests to 15 per minute.
+   * `runGeminiOcr` automatically cascades through `MODELS_TO_TRY` (`gemini-2.0-flash`, `gemini-2.0-flash-lite`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`, `gemini-1.5-pro`). If Gemini hits quota, wait 60 seconds for rate limits to reset.
+
+2. **Offline Tesseract.js Trade-Offs**:
+   * Tesseract.js runs offline CPU pattern matching (`ind.traineddata` & `eng.traineddata`).
+   * Unlike Gemini AI Vision, Tesseract lacks visual layout intelligence and may fail to extract numeric amounts from blurry thermal paper receipts or compressed WhatsApp JPEGs.
+
+3. **Fallback Text Prompt**:
+   * If all OCR engines fail, WhatsApp sends an actionable prompt guiding users to log the transaction via shorthand text (e.g. `50k lunch #food`).
 
 ---
 

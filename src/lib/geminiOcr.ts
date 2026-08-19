@@ -33,6 +33,7 @@ const MODELS_TO_TRY = [
   'gemini-2.0-flash',
   'gemini-2.0-flash-lite',
   'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
   'gemini-1.5-pro',
 ]
 
@@ -172,25 +173,33 @@ async function runGoogleVisionOcr(imageBuffer: Buffer): Promise<ExtractedReceipt
 }
 
 async function runTesseractOcr(imageBuffer: Buffer): Promise<ExtractedReceiptData> {
-  const { createWorker } = await import('tesseract.js')
-  const worker = await createWorker(['ind', 'eng'])
   try {
-    const { data } = await worker.recognize(imageBuffer)
-    const extractedText = data.text || ''
+    const { createWorker } = await import('tesseract.js')
+    const worker = await createWorker(['ind', 'eng'], 1, {
+      errorHandler: (err) => console.warn('[Tesseract Worker Warning]', err),
+    })
 
-    if (!extractedText.trim()) {
-      throw new Error('Tesseract local OCR produced no readable text.')
+    try {
+      const { data } = await worker.recognize(imageBuffer)
+      const extractedText = data.text || ''
+
+      if (!extractedText.trim()) {
+        throw new Error('Tesseract local OCR produced no readable text.')
+      }
+
+      const parsed = parseRawOcrText(extractedText)
+
+      return {
+        ...parsed,
+        ocrEngine: 'TESSERACT',
+        engineNotice: 'ℹ️ _Notice: Gemini AI rate limit reached. Processed using local offline OCR engine (takes a bit more processing time)._',
+      }
+    } finally {
+      await worker.terminate().catch(() => {})
     }
-
-    const parsed = parseRawOcrText(extractedText)
-
-    return {
-      ...parsed,
-      ocrEngine: 'TESSERACT',
-      engineNotice: 'ℹ️ _Notice: Gemini AI rate limit reached. Processed using local offline OCR engine (takes a bit more processing time)._',
-    }
-  } finally {
-    await worker.terminate()
+  } catch (err: any) {
+    console.error('[OCR Pipeline] Local Tesseract OCR failed:', err?.message || err)
+    throw new Error('Could not extract text or amount from receipt image across all OCR engines. Please send your transaction details as text (e.g. "50k lunch").')
   }
 }
 
