@@ -100,7 +100,8 @@ export async function handleWhatsAppWebhook(requestBody: any, headers: Record<st
       throw new Error('Message payload contains neither text nor media attachment.')
     }
   } catch (err: any) {
-    const errorReply = `❌ Failed to log transaction: ${err.message || err}`
+    console.error('[WhatsApp Webhook Error] Failed to process message:', err?.message || err)
+    const errorReply = `⚠️ *Meyker OCR Notice*\n\n${err.message || 'Unable to extract transaction details from receipt image.'}\n\n💡 *Tip*: You can log this transaction by sending text:\n• *"50k lunch #food"* \n• *"1.5m invoice #income"*`
     return {
       status: 200,
       body: provider === 'TWILIO' ? buildTwilioWhatsAppResponse(errorReply) : JSON.stringify({ message: errorReply }),
