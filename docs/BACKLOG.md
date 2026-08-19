@@ -1,6 +1,6 @@
 # Meyker Feature Backlog & Scope Guardrails
 
-This document tracks future feature ideas and roadmap items to ensure **Phase 1 MVP** remains strictly focused on core web stability.
+This document tracks future feature ideas, operational notes, and roadmap items.
 
 ---
 
@@ -10,9 +10,16 @@ This document tracks future feature ideas and roadmap items to ensure **Phase 1 
 - [x] **Google Gemini Flash Vision OCR**: Process uploaded receipt images and bank transfer screenshots with `gemini-1.5-flash` / `gemini-2.0-flash`.
 - [x] **WhatsApp Confirmation Replies**: Send automated WhatsApp response confirming entry logged.
 
+### 📝 Phase 2 Operational Notes & System Trade-offs
+- **Gemini API Key Quota Upgrade**: Free-tier rate limits (15 RPM) can trigger OCR fallbacks during peak usage. Future update will configure paid tier / key rotation.
+- **WhatsApp Image Receipt Notice**: Image OCR sensitivity requires proper lighting and uncompressed photos. Users are advised to send formatted text messages (e.g., `"50k lunch #food"`) for 100% instant reliability.
+
 ---
 
 ## 📊 Phase 3: Imports, Reports & Advanced Sync
+- [ ] **Web App Receipt Image Upload**: Direct drag-and-drop image upload inside the web dashboard (extending OCR beyond WhatsApp).
+- [ ] **Enhanced Date & Year Filtering**: Expand dashboard filtering beyond monthly (`YYYY-MM`) to support exact date ranges, custom date pickers, and multi-year views.
+- [ ] **shadcn/ui Component Upgrade**: Upgrade native select dropdowns and UI components to official `shadcn/ui` patterns.
 - [ ] **Bank Statement CSV/Excel Import**: Interactive UI with drag-and-drop column mapping.
 - [ ] **Monthly PDF Statement Generator**: Export formatted monthly statements and category breakdowns.
 - [ ] **Google Sheets API Live Sync**: Two-way sync to specified Google Sheet spreadsheets via OAuth2.
