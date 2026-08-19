@@ -33,8 +33,16 @@ It empowers individuals, freelancers, and small business owners to track income 
   - **Excel (`.xlsx`) Export**: Professionally formatted spreadsheets using **ExcelJS** complete with headers, number formatting, and formula totals.
   - **CSV Export**: Clean CSV download for spreadsheet tools and raw data analysis.
 
+- **🤖 WhatsApp AI & Vision OCR Automation**:
+  - Instant transaction logging via WhatsApp text messages (e.g. `"50k lunch #food"` or `"1.5m invoice #income"`).
+  - Multi-tier OCR Vision Pipeline for receipt images & bank transfer screenshots:
+    1. **Primary**: Google Gemini 1.5/2.0 Flash Vision AI (`@google/genai`).
+    2. **Fallback #1**: Google Cloud Vision API (`@google-cloud/vision`).
+    3. **Fallback #2**: Local offline Tesseract.js engine (`ind.traineddata` & `eng.traineddata`).
+  - Automated WhatsApp confirmation replies with transaction summaries and fallback tips.
+
 - **🧪 Unit Testing & Quality Assurance**:
-  - Full Vitest test suite covering calculation utilities, export engine, Supabase integration, UI components, and routes.
+  - Full Vitest test suite covering calculation utilities, export engine, Supabase integration, OCR vision fallbacks, WhatsApp NL parser, UI components, and routes (53 passing tests).
 
 ---
 
@@ -130,21 +138,38 @@ meyker/
 
 ## 🗺️ Product Roadmap
 
-- **✅ Phase 1: Core Web MVP (Current)**:
+- **✅ Phase 1: Core Web MVP (Completed)**:
   - Supabase Auth (Email & Google OAuth)
   - Category Management & Transaction Logging
   - Financial Dashboard (KPI Cards, Pie & Bar Charts)
   - Search, Filter, and Excel/CSV Export
   - Modular refactoring & unit testing suite
 
-- **⏳ Phase 2: WhatsApp AI Automation (Upcoming)**:
-  - Twilio WhatsApp webhook integration for instant text expense logging
-  - Receipt image scanning & OCR parsing via OpenAI Vision (GPT-4o-mini)
+- **✅ Phase 2: WhatsApp AI & Vision OCR (Completed)**:
+  - Twilio & Qiscus WhatsApp webhook adapters
+  - Google Gemini Flash Vision AI OCR (`gemini-2.0-flash`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`)
+  - Multi-engine OCR fallback (Google Cloud Vision & local Tesseract.js)
+  - Natural Language text expense parser (`"50k lunch #food"`)
 
-- **⏳ Phase 3: Advanced Sync & Reports**:
+- **⏳ Phase 3: Advanced Sync & Reports (Upcoming)**:
   - Bank statement CSV/Excel bulk import UI
   - Automated PDF monthly financial statements
   - Live two-way sync with Google Sheets API
+
+---
+
+## 💡 Technical Notes: OCR Pipeline & Rate Limits
+
+1. **Gemini Free-Tier Rate Limits (15 RPM)**:
+   * Google AI Studio free tier limits requests to 15 per minute.
+   * `runGeminiOcr` automatically cascades through `MODELS_TO_TRY` (`gemini-2.0-flash`, `gemini-2.0-flash-lite`, `gemini-1.5-flash`, `gemini-1.5-flash-8b`, `gemini-1.5-pro`). If Gemini hits quota, wait 60 seconds for rate limits to reset.
+
+2. **Offline Tesseract.js Trade-Offs**:
+   * Tesseract.js runs offline CPU pattern matching (`ind.traineddata` & `eng.traineddata`).
+   * Unlike Gemini AI Vision, Tesseract lacks visual layout intelligence and may fail to extract numeric amounts from blurry thermal paper receipts or compressed WhatsApp JPEGs.
+
+3. **Fallback Text Prompt**:
+   * If all OCR engines fail, WhatsApp sends an actionable prompt guiding users to log the transaction via shorthand text (e.g. `50k lunch #food`).
 
 ---
 
