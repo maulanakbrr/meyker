@@ -5,6 +5,19 @@ All notable changes to the **Meyker Financial Tracker** project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-08-19
+
+### ⚙️ Fixed & Improved
+- **OCR Vision Resilience & Model Cascade**:
+  - Added `gemini-1.5-flash-8b` to Gemini Vision model fallback sequence to bypass 15 RPM rate limits.
+  - Safe Node `worker_threads` exception handling for Tesseract.js to prevent server crashes.
+  - Formatted WhatsApp fallback notices guiding users to text transaction format (`"50k lunch #food"`).
+- **Project Documentation Reorganization**:
+  - Organized project spec files (`PRD.md`, `BACKLOG.md`, `CHANGELOG.md`) into dedicated `docs/` directory.
+  - Added Phase 2 operational notes and Phase 3 requirements (direct web receipt upload, custom date pickers, shadcn/ui components) to `docs/BACKLOG.md`.
+
+---
+
 ## [0.2.0] - 2026-08-19
 
 ### 🎉 Added (Phase 2: WhatsApp & AI Vision OCR)
