@@ -20,3 +20,8 @@ npm-debug.log*
 html/
 coverage/
 
+# Tesseract.js Offline OCR Trained Models
+*.traineddata
+*.traineddata.gz
+
+
