@@ -113,25 +113,28 @@ It empowers individuals, freelancers, and small business owners to track income 
 
 ```text
 meyker/
-├── src/
+├── docs/                 # Project documentation & specs
+│   ├── PRD.md            # Product Requirement Document
+│   ├── BACKLOG.md        # Feature backlog & scope guardrails
+│   └── CHANGELOG.md      # Version release history
+├── src/                  # Application source code
 │   ├── components/       # Reusable UI & modular dashboard components
 │   │   ├── auth/         # Login & registration components
 │   │   ├── dashboard/    # Header, Controls, StatCards, Charts, TransactionList, Modals
 │   │   └── ui/           # Basic layout primitives (Card, Button, Divider)
 │   ├── db/               # Drizzle ORM database schema & default categories
 │   ├── hooks/            # Custom React hooks (useDashboard state & CRUD handlers)
-│   ├── lib/              # Utility functions, export engine, Supabase client
+│   ├── lib/              # Utility functions, OCR vision, export engine, Supabase client
 │   │   ├── dashboardUtils.ts   # Metric computations, aggregations & filtering
 │   │   ├── export.ts           # ExcelJS & CSV generator logic
-│   │   ├── mockData.ts         # Fallback preview dataset
+│   │   ├── geminiOcr.ts        # Gemini Flash Vision AI OCR & Tesseract fallback
 │   │   ├── supabase.ts         # Supabase client & auth helpers
-│   │   └── utils.ts            # Currency formatters & general helpers
+│   │   ├── whatsappAdapter.ts  # Twilio & Qiscus WhatsApp payload parser
+│   │   └── whatsappWebhookService.ts # WhatsApp transaction webhook handler
 │   ├── routes/           # TanStack file-based router entries (index, login, auth)
-│   ├── test/             # Vitest test setup and global mocks
 │   └── types/            # TypeScript interface definitions (Transaction, Category, etc.)
-├── PRD.md                # Product Requirement Document
-├── BACKLOG.md            # Roadmap scope guardrails
-└── vite.config.ts        # Vite & Vitest configuration
+├── README.md             # Repository overview & setup instructions
+└── vite.config.ts        # Vite, Vitest & WhatsApp webhook middleware config
 ```
 
 ---
