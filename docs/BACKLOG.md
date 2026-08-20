@@ -21,7 +21,7 @@ This document tracks future feature ideas, operational notes, and roadmap items.
 - [ ] **Enhanced Date & Year Filtering**: Expand dashboard filtering beyond monthly (`YYYY-MM`) to support exact date ranges, custom date pickers, and multi-year views.
 - [ ] **shadcn/ui Component Upgrade**: Upgrade native select dropdowns and UI components to official `shadcn/ui` patterns.
 - [x] **Bank Statement CSV/Excel Import**: Interactive UI with auto-preset detection (BCA, Mandiri, BRI, CIMB, Generic) and intelligent category keyword matching.
-- [ ] **Monthly PDF Statement Generator**: Export formatted monthly statements and category breakdowns.
+- [x] **Monthly PDF Statement Generator**: Export formatted monthly statements and category breakdowns using jsPDF & jspdf-autotable.
 - [ ] **Google Sheets API Live Sync**: Two-way sync to specified Google Sheet spreadsheets via OAuth2.
 - [ ] **Savings Goals & Category Budgets**: Set spending limits per category and track progress toward savings targets.
 - [ ] **Recurring Transactions**: Auto-schedule monthly rent, subscription payments, or salary receipts.

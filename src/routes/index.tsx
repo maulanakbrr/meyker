@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Wallet } from 'lucide-react'
 import { LoginPage } from './login'
-import { exportToExcel, exportToCSV } from '../lib/export'
+import { exportToExcel, exportToCSV, exportToPdf } from '../lib/export'
 import { useDashboard } from '../hooks/useDashboard'
 import { DashboardHeader } from '../components/dashboard/DashboardHeader'
 import { DashboardControls } from '../components/dashboard/DashboardControls'
@@ -135,6 +135,23 @@ function DashboardPage() {
         }}
         onExportCSV={() => {
           exportToCSV(dashboard.filteredTransactions)
+          dashboard.setShowExportModal(false)
+        }}
+        onExportPDF={() => {
+          const label =
+            dashboard.dateRange.type === 'CUSTOM'
+              ? `${dashboard.dateRange.startDate} to ${dashboard.dateRange.endDate}`
+              : dashboard.dateRange.type === 'MONTHLY'
+              ? dashboard.dateRange.selectedMonth
+              : dashboard.dateRange.type === 'YEARLY'
+              ? dashboard.dateRange.selectedYear
+              : 'All Time'
+          exportToPdf(
+            dashboard.filteredTransactions,
+            dashboard.stats,
+            dashboard.categoryBreakdownData,
+            label
+          )
           dashboard.setShowExportModal(false)
         }}
       />

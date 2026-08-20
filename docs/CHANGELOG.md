@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-08-20
 
-### 🎉 Added (Phase 3: Bank Statement & CSV/Excel Import)
+### 🎉 Added (Phase 3: Bank Statement Import & PDF Reports)
+- **Monthly PDF Statement Generator**:
+  - Export branded, professional PDF financial statements and tax summaries using `jspdf` and `jspdf-autotable` (`exportToPdf`).
+  - Branded header banner, period metadata tag, and styled KPI Summary Cards (Net Balance, Total Income, Total Expenses).
+  - Categorized Expense Breakdown Table with percentage share calculation and itemized Transaction History Table with color-coded type tags (`INCOME` / `EXPENSE`).
+  - Dynamic page numbering (`Page X of Y`) and automatic multi-page overflow layout handling.
 - **Bank Statement & CSV/Excel Import Engine**:
   - Bulk import support for CSV and Excel (`.xlsx`) bank statements (`BankStatementImportModal.tsx`).
   - Auto-detection preset mapping for major Indonesian banks (BCA, Mandiri, BRI, CIMB Niaga) as well as Generic CSV formats (`detectBankFormat`).
@@ -15,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Intelligent category keyword auto-matching based on transaction description/note or row category hints (`matchCategoryForTransaction`).
   - One-click sample import template generator for CSV and Excel formats (`downloadImportTemplateCSV`, `downloadImportTemplateXLSX`).
 - **Vitest Unit Test Coverage**:
-  - Unit test suite covering bank statement parser, format detection, date parsing, and modal UI (78 passing tests across 21 test files).
+  - Comprehensive unit test suite covering PDF generation, export modal triggers, bank statement parser, format detection, and import modal UI (80 passing tests across 22 test files).
 
 ---
 
