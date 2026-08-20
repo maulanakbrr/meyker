@@ -42,6 +42,7 @@ export function TransactionList({
           {/* Search input */}
           <div className="w-44">
             <Input
+              name="searchQuery"
               type="text"
               placeholder="Search note..."
               value={searchQuery}
@@ -76,7 +77,7 @@ export function TransactionList({
           </Tabs>
 
           {/* Category Filter Select */}
-          <Select value={categoryFilter} onValueChange={onCategoryFilterChange}>
+          <Select name="categoryFilter" value={categoryFilter} onValueChange={onCategoryFilterChange}>
             <SelectTrigger className="bg-gray-900 border-gray-800 text-xs text-white h-9 w-40">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>

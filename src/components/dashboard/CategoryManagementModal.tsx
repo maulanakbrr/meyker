@@ -42,6 +42,7 @@ export function CategoryManagementModal({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="col-span-2">
               <Input
+                name="catName"
                 type="text"
                 required
                 placeholder="Category Name"
@@ -50,7 +51,7 @@ export function CategoryManagementModal({
                 className="bg-gray-900 border-gray-800 text-white"
               />
             </div>
-            <Select value={catType} onValueChange={(val) => setCatType(val as TransactionType)}>
+            <Select name="catType" value={catType} onValueChange={(val) => setCatType(val as TransactionType)}>
               <SelectTrigger className="bg-gray-900 border-gray-800 text-white">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
@@ -63,6 +64,7 @@ export function CategoryManagementModal({
           <div className="flex items-center gap-3">
             <label className="text-xs text-gray-400">Badge Color:</label>
             <input
+              name="catColor"
               type="color"
               value={catColor}
               onChange={(e) => setCatColor(e.target.value)}

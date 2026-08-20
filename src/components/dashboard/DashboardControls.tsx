@@ -27,6 +27,7 @@ export function DashboardControls({
         </label>
         <input
           id="month-filter"
+          name="selectedMonth"
           type="month"
           value={selectedMonth}
           onChange={(e) => onMonthChange(e.target.value)}

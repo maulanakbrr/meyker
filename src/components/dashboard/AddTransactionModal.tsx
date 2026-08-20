@@ -79,6 +79,7 @@ export function AddTransactionModal({
           <div className="space-y-1">
             <label className="block text-xs font-medium text-gray-300">Amount ($)</label>
             <Input
+              name="amount"
               type="number"
               step="0.01"
               required
@@ -91,7 +92,7 @@ export function AddTransactionModal({
 
           <div className="space-y-1">
             <label className="block text-xs font-medium text-gray-300">Category</label>
-            <Select value={txCategory} onValueChange={setTxCategory}>
+            <Select name="category" value={txCategory} onValueChange={setTxCategory}>
               <SelectTrigger className="bg-gray-900 border-gray-800 text-white">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
@@ -109,6 +110,7 @@ export function AddTransactionModal({
             <div className="space-y-1">
               <label className="block text-xs font-medium text-gray-300">Date</label>
               <Input
+                name="date"
                 type="date"
                 value={txDate}
                 onChange={(e) => setTxDate(e.target.value)}
@@ -117,7 +119,7 @@ export function AddTransactionModal({
             </div>
             <div className="space-y-1">
               <label className="block text-xs font-medium text-gray-300">Payment Method</label>
-              <Select value={txPaymentMethod} onValueChange={(val) => setTxPaymentMethod(val as PaymentMethod)}>
+              <Select name="paymentMethod" value={txPaymentMethod} onValueChange={(val) => setTxPaymentMethod(val as PaymentMethod)}>
                 <SelectTrigger className="bg-gray-900 border-gray-800 text-white">
                   <SelectValue placeholder="Select Payment Method" />
                 </SelectTrigger>
@@ -134,6 +136,7 @@ export function AddTransactionModal({
           <div className="space-y-1">
             <label className="block text-xs font-medium text-gray-300">Note / Memo</label>
             <Input
+              name="note"
               type="text"
               placeholder="e.g. Grocery shopping at Supermarket"
               value={txNote}

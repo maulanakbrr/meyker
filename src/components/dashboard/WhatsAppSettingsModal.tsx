@@ -81,6 +81,7 @@ export function WhatsAppSettingsModal({
 
         <form onSubmit={handleSavePhone} className="space-y-4">
           <Input
+            name="phoneNumber"
             label="WhatsApp Phone Number (E.164 format)"
             type="text"
             placeholder="+628123456789"
