@@ -1,9 +1,11 @@
-import { Calendar, Tag, Download, Plus, MessageSquare, Scan } from 'lucide-react'
+import { Tag, Download, Plus, MessageSquare, Scan } from 'lucide-react'
 import { Button } from '../ui/button'
+import { DateFilterPicker } from './DateFilterPicker'
+import type { DateFilterRange } from '../../lib/dateUtils'
 
 interface DashboardControlsProps {
-  selectedMonth: string
-  onMonthChange: (month: string) => void
+  dateRange: DateFilterRange
+  onDateRangeChange: (range: DateFilterRange) => void
   onOpenCategoryModal: () => void
   onOpenExportModal: () => void
   onOpenAddTxModal: () => void
@@ -12,8 +14,8 @@ interface DashboardControlsProps {
 }
 
 export function DashboardControls({
-  selectedMonth,
-  onMonthChange,
+  dateRange,
+  onDateRangeChange,
   onOpenCategoryModal,
   onOpenExportModal,
   onOpenAddTxModal,
@@ -23,18 +25,10 @@ export function DashboardControls({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
       <div className="flex items-center gap-3">
-        <Calendar className="w-5 h-5 text-indigo-400 shrink-0" />
-        <label htmlFor="month-filter" className="text-xs font-medium text-gray-400">
-          Filter Month:
+        <label htmlFor="date-range-filter" className="text-xs font-medium text-gray-400">
+          Filter Period:
         </label>
-        <input
-          id="month-filter"
-          name="selectedMonth"
-          type="month"
-          value={selectedMonth}
-          onChange={(e) => onMonthChange(e.target.value)}
-          className="bg-gray-900 border border-gray-700/80 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
-        />
+        <DateFilterPicker dateRange={dateRange} onDateRangeChange={onDateRangeChange} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

@@ -52,8 +52,8 @@ function DashboardPage() {
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 pt-8 space-y-8 flex-1">
         {/* Controls Header */}
         <DashboardControls
-          selectedMonth={dashboard.selectedMonth}
-          onMonthChange={dashboard.setSelectedMonth}
+          dateRange={dashboard.dateRange}
+          onDateRangeChange={dashboard.setDateRange}
           onOpenCategoryModal={() => dashboard.setShowCatModal(true)}
           onOpenExportModal={() => dashboard.setShowExportModal(true)}
           onOpenAddTxModal={() => dashboard.setShowAddTxModal(true)}
