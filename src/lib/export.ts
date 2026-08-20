@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs'
 import type { Transaction } from '../types'
+export { exportToPdf, formatIdrCurrency } from './pdfExport'
 
 /**
  * Export transactions list to a styled Excel (.xlsx) file using ExcelJS

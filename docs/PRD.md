@@ -50,8 +50,8 @@
 ### Phase 3: Imports, Advanced Sync & Reports (In Progress)
 - **File Import Engine (Completed)**:
   - Bulk import from external bank statement CSV/Excel files with bank format auto-detection (BCA, Mandiri, BRI, CIMB, Generic) and interactive column mapping UI.
-- **Monthly PDF Reports**:
-  - Automated PDF export for monthly financial statements and tax summaries.
+- **Monthly PDF Reports (Completed)**:
+  - Automated client-side PDF export for branded monthly financial statements, KPI metrics, category breakdowns, and tax summaries (`jsPDF` + `jspdf-autotable`).
 - **Live Sync with Google Sheets API**:
   - Two-way live synchronization using Google Sheets API (OAuth2).
 - **Savings Goals & Category Budgets**:

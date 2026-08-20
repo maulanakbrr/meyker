@@ -3,6 +3,7 @@ import {
   getDateRangeForPreset,
   isDateInRange,
   formatShortDate,
+  getDateFilterPeriodLabel,
 } from '../dateUtils'
 
 describe('dateUtils', () => {
@@ -36,5 +37,22 @@ describe('dateUtils', () => {
 
   it('formats short dates nicely', () => {
     expect(formatShortDate('2026-07-15')).toBe('Jul 15, 2026')
+  })
+
+  it('generates accurate period labels for PDF reports', () => {
+    const todayRange = getDateRangeForPreset('TODAY')
+    expect(getDateFilterPeriodLabel(todayRange)).toContain('Today')
+
+    const yesterdayRange = getDateRangeForPreset('YESTERDAY')
+    expect(getDateFilterPeriodLabel(yesterdayRange)).toContain('Yesterday')
+
+    const monthRange = getDateRangeForPreset('THIS_MONTH')
+    expect(getDateFilterPeriodLabel(monthRange)).toContain('to')
+
+    const customRange = getDateRangeForPreset('CUSTOM', '2026-08-01', '2026-08-15')
+    expect(getDateFilterPeriodLabel(customRange)).toBe('Aug 1, 2026 to Aug 15, 2026')
+
+    const allTimeRange = getDateRangeForPreset('ALL_TIME')
+    expect(getDateFilterPeriodLabel(allTimeRange)).toBe('All Time')
   })
 })
