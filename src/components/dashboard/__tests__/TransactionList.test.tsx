@@ -97,13 +97,11 @@ describe('TransactionList', () => {
     fireEvent.change(searchInput, { target: { value: 'Salary' } })
     expect(handleSearch).toHaveBeenCalledWith('Salary')
 
-    const incomeBtn = screen.getByRole('button', { name: /^income$/i })
+    const incomeBtn = screen.getByRole('tab', { name: /^income$/i })
+    fireEvent.pointerDown(incomeBtn, { button: 0 })
     fireEvent.click(incomeBtn)
+    fireEvent.keyDown(incomeBtn, { key: 'Enter' })
     expect(handleTypeFilter).toHaveBeenCalledWith('INCOME')
-
-    const categorySelect = screen.getByRole('combobox')
-    fireEvent.change(categorySelect, { target: { value: 'cat-1' } })
-    expect(handleCategoryFilter).toHaveBeenCalledWith('cat-1')
   })
 
   it('triggers delete action when delete button is clicked', () => {

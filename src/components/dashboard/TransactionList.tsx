@@ -1,6 +1,10 @@
 import { Search, Tag, Trash2, MessageSquare } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
 import type { Transaction, Category } from '../../types'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select'
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -36,58 +40,56 @@ export function TransactionList({
         {/* Filter Bar */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Search input */}
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5" />
-            <input
+          <div className="w-44">
+            <Input
+              name="searchQuery"
               type="text"
               placeholder="Search note..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="bg-gray-900 border border-gray-700/80 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-44"
+              leftIcon={<Search className="w-3.5 h-3.5 text-gray-400" />}
+              className="bg-gray-900 border-gray-800 text-xs h-9"
             />
           </div>
 
-          {/* Type Filter */}
-          <div className="flex bg-gray-900 p-1 rounded-xl border border-gray-800 text-xs">
-            <button
-              onClick={() => onTypeFilterChange('ALL')}
-              className={`px-3 py-1 rounded-lg font-medium transition-all ${
-                typeFilter === 'ALL' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              All
-            </button>
-            <button
-              onClick={() => onTypeFilterChange('INCOME')}
-              className={`px-3 py-1 rounded-lg font-medium transition-all ${
-                typeFilter === 'INCOME' ? 'bg-emerald-600 text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Income
-            </button>
-            <button
-              onClick={() => onTypeFilterChange('EXPENSE')}
-              className={`px-3 py-1 rounded-lg font-medium transition-all ${
-                typeFilter === 'EXPENSE' ? 'bg-rose-600 text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              Expense
-            </button>
-          </div>
+          {/* Type Filter Tabs */}
+          <Tabs value={typeFilter} onValueChange={(val) => onTypeFilterChange(val as any)}>
+            <TabsList className="bg-gray-900 border border-gray-800 p-0.5 rounded-xl h-9">
+              <TabsTrigger
+                value="ALL"
+                className="px-3 py-1 text-xs font-medium text-gray-400 data-[state=active]:bg-indigo-600 data-[state=active]:text-white rounded-lg cursor-pointer"
+              >
+                All
+              </TabsTrigger>
+              <TabsTrigger
+                value="INCOME"
+                className="px-3 py-1 text-xs font-medium text-gray-400 data-[state=active]:bg-emerald-600 data-[state=active]:text-white rounded-lg cursor-pointer"
+              >
+                Income
+              </TabsTrigger>
+              <TabsTrigger
+                value="EXPENSE"
+                className="px-3 py-1 text-xs font-medium text-gray-400 data-[state=active]:bg-rose-600 data-[state=active]:text-white rounded-lg cursor-pointer"
+              >
+                Expense
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => onCategoryFilterChange(e.target.value)}
-            className="bg-gray-900 border border-gray-700/80 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-          >
-            <option value="ALL">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          {/* Category Filter Select */}
+          <Select name="categoryFilter" value={categoryFilter} onValueChange={onCategoryFilterChange}>
+            <SelectTrigger className="bg-gray-900 border-gray-800 text-xs text-white h-9 w-40">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent className="bg-gray-900 border-gray-800 text-white">
+              <SelectItem value="ALL">All Categories</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -156,13 +158,15 @@ export function TransactionList({
                     {tx.type === 'INCOME' ? '+' : '-'} {formatCurrency(Number(tx.amount))}
                   </td>
                   <td className="py-3.5 px-4 text-center">
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => onDeleteTransaction(tx.id)}
-                      className="p-1.5 rounded-lg text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+                      className="p-1.5 h-8 w-8 text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all cursor-pointer"
                       title="Delete transaction"
                     >
                       <Trash2 className="w-4 h-4" />
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -177,3 +181,4 @@ export function TransactionList({
     </div>
   )
 }
+

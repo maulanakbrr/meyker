@@ -1,4 +1,5 @@
 import { Calendar, Tag, Download, Plus, MessageSquare } from 'lucide-react'
+import { Button } from '../ui/button'
 
 interface DashboardControlsProps {
   selectedMonth: string
@@ -26,42 +27,55 @@ export function DashboardControls({
         </label>
         <input
           id="month-filter"
+          name="selectedMonth"
           type="month"
           value={selectedMonth}
           onChange={(e) => onMonthChange(e.target.value)}
-          className="bg-gray-900 border border-gray-700/80 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+          className="bg-gray-900 border border-gray-700/80 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
         />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <Button
           onClick={onOpenWhatsAppModal}
-          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          leftIcon={<MessageSquare className="w-3.5 h-3.5 text-emerald-400" />}
+          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
         >
-          <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> WhatsApp AI
-        </button>
+          WhatsApp AI
+        </Button>
 
-        <button
+        <Button
           onClick={onOpenCategoryModal}
-          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border border-gray-700/60 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          leftIcon={<Tag className="w-3.5 h-3.5 text-indigo-400" />}
+          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
         >
-          <Tag className="w-3.5 h-3.5 text-indigo-400" /> Categories
-        </button>
+          Categories
+        </Button>
 
-        <button
+        <Button
           onClick={onOpenExportModal}
-          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border border-gray-700/60 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          leftIcon={<Download className="w-3.5 h-3.5 text-emerald-400" />}
+          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
         >
-          <Download className="w-3.5 h-3.5 text-emerald-400" /> Export Data
-        </button>
+          Export Data
+        </Button>
 
-        <button
+        <Button
           onClick={onOpenAddTxModal}
-          className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2"
+          variant="primary"
+          size="sm"
+          leftIcon={<Plus className="w-4 h-4" />}
         >
-          <Plus className="w-4 h-4" /> Add Transaction
-        </button>
+          Add Transaction
+        </Button>
       </div>
     </div>
   )
 }
+

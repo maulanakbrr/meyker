@@ -61,6 +61,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {isSignUp && (
           <Input
+            name="fullName"
             label="Full Name"
             type="text"
             required
@@ -72,6 +73,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         )}
 
         <Input
+          name="email"
           label="Email Address"
           type="email"
           required
@@ -82,6 +84,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         />
 
         <Input
+          name="password"
           label="Password"
           type={showPassword ? 'text' : 'password'}
           required

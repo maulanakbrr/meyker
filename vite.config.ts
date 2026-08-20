@@ -1,5 +1,6 @@
 /// <reference types="vitest/config" />
 import 'dotenv/config'
+import path from 'path'
 import { defineConfig, Plugin } from 'vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
@@ -74,6 +75,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: {
+      '@': path.resolve(__dirname, './src'),
       tslib: 'tslib/tslib.es6.mjs',
     },
   },
