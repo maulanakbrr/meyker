@@ -6,6 +6,7 @@ import {
   type FilterCategory,
   getDateRangeForPreset,
   formatShortDate,
+  formatDateISO,
 } from '../../lib/dateUtils'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
 import { Calendar } from '../ui/calendar'
@@ -70,9 +71,9 @@ export function DateFilterPicker({ dateRange, onDateRangeChange }: DateFilterPic
 
   const handleCustomRangeSelect = (range: DateRange | undefined) => {
     setSelectedRange(range)
-    if (range?.from && range?.to) {
-      const startStr = range.from.toISOString().slice(0, 10)
-      const endStr = range.to.toISOString().slice(0, 10)
+    if (range?.from) {
+      const startStr = formatDateISO(range.from)
+      const endStr = range.to ? formatDateISO(range.to) : startStr
       const newRange = getDateRangeForPreset('CUSTOM', startStr, endStr)
       onDateRangeChange(newRange)
     }
