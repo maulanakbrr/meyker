@@ -1,5 +1,9 @@
-import { X } from 'lucide-react'
 import type { Category, TransactionType, PaymentMethod } from '../../types'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select'
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
 
 interface AddTransactionModalProps {
   isOpen: boolean
@@ -38,115 +42,96 @@ export function AddTransactionModal({
   txNote,
   setTxNote,
 }: AddTransactionModalProps) {
-  if (!isOpen) return null
+  const categoryOptions = categories.filter((c) => c.type === txType)
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
-      <div className="glass-modal w-full max-w-md rounded-2xl p-6 border border-white/10 space-y-5 animate-fade-in max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between pb-3 border-b border-gray-800">
-          <h3 className="font-bold text-white text-base">Add New Transaction</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-md bg-gray-950 text-white border-gray-800">
+        <DialogHeader>
+          <DialogTitle className="text-white">Add New Transaction</DialogTitle>
+        </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="flex bg-gray-900 p-1 rounded-xl border border-gray-800">
-            <button
-              type="button"
-              onClick={() => setTxType('EXPENSE')}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                txType === 'EXPENSE' ? 'bg-rose-600 text-white' : 'text-gray-400'
-              }`}
-            >
-              Expense
-            </button>
-            <button
-              type="button"
-              onClick={() => setTxType('INCOME')}
-              className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                txType === 'INCOME' ? 'bg-emerald-600 text-white' : 'text-gray-400'
-              }`}
-            >
-              Income
-            </button>
-          </div>
+        <form onSubmit={onSubmit} className="space-y-4 pt-2">
+          <Tabs value={txType} onValueChange={(val) => setTxType(val as TransactionType)} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-gray-900 border border-gray-800">
+              <TabsTrigger value="EXPENSE">Expense</TabsTrigger>
+              <TabsTrigger value="INCOME">Income</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Amount ($)</label>
-            <input
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-300">Amount ($)</label>
+            <Input
               type="number"
               step="0.01"
               required
               placeholder="0.00"
               value={txAmount}
               onChange={(e) => setTxAmount(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="bg-gray-900 border-gray-800 text-white"
             />
           </div>
 
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Category</label>
-            <select
-              value={txCategory}
-              onChange={(e) => setTxCategory(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
-            >
-              <option value="">Select Category</option>
-              {categories
-                .filter((c) => c.type === txType)
-                .map((c) => (
-                  <option key={c.id} value={c.id}>
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-300">Category</label>
+            <Select value={txCategory} onValueChange={setTxCategory}>
+              <SelectTrigger className="bg-gray-900 border-gray-800 text-white">
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-900 border-gray-800 text-white">
+                {categoryOptions.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
                     {c.name}
-                  </option>
+                  </SelectItem>
                 ))}
-            </select>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Date</label>
-              <input
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-gray-300">Date</label>
+              <Input
                 type="date"
                 value={txDate}
                 onChange={(e) => setTxDate(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="bg-gray-900 border-gray-800 text-white"
               />
             </div>
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Payment Method</label>
-              <select
-                value={txPaymentMethod}
-                onChange={(e) => setTxPaymentMethod(e.target.value as PaymentMethod)}
-                className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
-              >
-                <option value="CASH">Cash</option>
-                <option value="BANK_TRANSFER">Bank Transfer</option>
-                <option value="CREDIT_CARD">Credit Card</option>
-                <option value="E_WALLET">E-Wallet</option>
-              </select>
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-gray-300">Payment Method</label>
+              <Select value={txPaymentMethod} onValueChange={(val) => setTxPaymentMethod(val as PaymentMethod)}>
+                <SelectTrigger className="bg-gray-900 border-gray-800 text-white">
+                  <SelectValue placeholder="Select Payment Method" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 border-gray-800 text-white">
+                  <SelectItem value="CASH">Cash</SelectItem>
+                  <SelectItem value="BANK_TRANSFER">Bank Transfer</SelectItem>
+                  <SelectItem value="CREDIT_CARD">Credit Card</SelectItem>
+                  <SelectItem value="E_WALLET">E-Wallet</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs text-gray-400 mb-1">Note / Memo</label>
-            <input
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-300">Note / Memo</label>
+            <Input
               type="text"
               placeholder="e.g. Grocery shopping at Supermarket"
               value={txNote}
               onChange={(e) => setTxNote(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-700 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="bg-gray-900 border-gray-800 text-white"
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-xl transition-all text-sm mt-2"
-          >
+          <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium mt-2">
             Save Transaction
-          </button>
+          </Button>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
+
+
