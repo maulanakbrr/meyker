@@ -1,14 +1,17 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DashboardControls } from '../DashboardControls'
+import { getDateRangeForPreset } from '../../../lib/dateUtils'
 
 describe('DashboardControls', () => {
-  it('renders selected month and triggers month change handler', () => {
-    const handleMonthChange = vi.fn()
+  it('renders filter period trigger button with current preset label', () => {
+    const handleRangeChange = vi.fn()
+    const sampleRange = getDateRangeForPreset('THIS_MONTH')
+
     render(
       <DashboardControls
-        selectedMonth="2026-07"
-        onMonthChange={handleMonthChange}
+        dateRange={sampleRange}
+        onDateRangeChange={handleRangeChange}
         onOpenCategoryModal={vi.fn()}
         onOpenExportModal={vi.fn()}
         onOpenAddTxModal={vi.fn()}
@@ -17,11 +20,7 @@ describe('DashboardControls', () => {
       />
     )
 
-    const monthInput = screen.getByLabelText(/filter month:/i) as HTMLInputElement
-    expect(monthInput.value).toBe('2026-07')
-
-    fireEvent.change(monthInput, { target: { value: '2026-08' } })
-    expect(handleMonthChange).toHaveBeenCalledWith('2026-08')
+    expect(screen.getByText('This Month')).toBeInTheDocument()
   })
 
   it('triggers modal opening callbacks when action buttons are clicked', () => {
@@ -33,8 +32,8 @@ describe('DashboardControls', () => {
 
     render(
       <DashboardControls
-        selectedMonth="2026-07"
-        onMonthChange={vi.fn()}
+        dateRange={getDateRangeForPreset('THIS_MONTH')}
+        onDateRangeChange={vi.fn()}
         onOpenCategoryModal={handleOpenCat}
         onOpenExportModal={handleOpenExport}
         onOpenAddTxModal={handleOpenAddTx}
@@ -59,3 +58,4 @@ describe('DashboardControls', () => {
     expect(handleOpenAddTx).toHaveBeenCalledTimes(1)
   })
 })
+

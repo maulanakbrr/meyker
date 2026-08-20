@@ -9,6 +9,8 @@ import {
   filterDashboardTransactions,
 } from '../lib/dashboardUtils'
 
+import { getDateRangeForPreset, type DateFilterRange } from '../lib/dateUtils'
+
 export function useDashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState<any>(null)
@@ -21,6 +23,9 @@ export function useDashboard() {
   // Filter State
   const [selectedMonth, setSelectedMonth] = useState<string>(
     new Date().toISOString().slice(0, 7) // 'YYYY-MM'
+  )
+  const [dateRange, setDateRange] = useState<DateFilterRange>(() =>
+    getDateRangeForPreset('THIS_MONTH')
   )
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<'ALL' | 'INCOME' | 'EXPENSE'>('ALL')
@@ -405,22 +410,23 @@ export function useDashboard() {
   const filteredTransactions = useMemo(
     () =>
       filterDashboardTransactions(transactions, {
+        dateRange,
         selectedMonth,
         typeFilter,
         categoryFilter,
         searchQuery,
       }),
-    [transactions, selectedMonth, typeFilter, categoryFilter, searchQuery]
+    [transactions, dateRange, selectedMonth, typeFilter, categoryFilter, searchQuery]
   )
 
   const stats = useMemo(
-    () => calculateDashboardStats(transactions, selectedMonth),
-    [transactions, selectedMonth]
+    () => calculateDashboardStats(transactions, dateRange || selectedMonth),
+    [transactions, dateRange, selectedMonth]
   )
 
   const categoryBreakdownData = useMemo(
-    () => calculateCategoryBreakdown(transactions, selectedMonth, categories),
-    [transactions, selectedMonth, categories]
+    () => calculateCategoryBreakdown(transactions, dateRange || selectedMonth, categories),
+    [transactions, dateRange, selectedMonth, categories]
   )
 
   const monthlyTrendData = useMemo(
@@ -445,6 +451,8 @@ export function useDashboard() {
     // Filter State
     selectedMonth,
     setSelectedMonth,
+    dateRange,
+    setDateRange,
     searchQuery,
     setSearchQuery,
     typeFilter,
