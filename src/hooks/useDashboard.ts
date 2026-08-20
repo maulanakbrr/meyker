@@ -38,6 +38,7 @@ export function useDashboard() {
   const [showExportModal, setShowExportModal] = useState(false)
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
   const [showReceiptModal, setShowReceiptModal] = useState(false)
+  const [showBankImportModal, setShowBankImportModal] = useState(false)
 
   // Form State - New Transaction
   const [txAmount, setTxAmount] = useState('')
@@ -406,6 +407,54 @@ export function useDashboard() {
     setShowAddTxModal(true)
   }
 
+  const handleImportBankTransactions = async (
+    txs: {
+      date: string
+      amount: number
+      type: 'INCOME' | 'EXPENSE'
+      categoryId: string
+      note: string
+      paymentMethod: 'BANK_TRANSFER'
+    }[]
+  ) => {
+    if (!user) return
+
+    const insertPayloads = txs.map((t) => ({
+      user_id: user.id,
+      amount: t.amount,
+      type: t.type,
+      category_id: t.categoryId,
+      payment_method: t.paymentMethod,
+      note: t.note,
+      transaction_date: t.date,
+    }))
+
+    const { data: inserted, error } = await supabase
+      .from('transactions')
+      .insert(insertPayloads)
+      .select('*, category:categories(*)')
+
+    if (error) throw error
+
+    if (inserted) {
+      const formattedInserted = inserted.map((row: any) => ({
+        id: row.id,
+        userId: row.user_id,
+        amount: Number(row.amount),
+        type: row.type,
+        categoryId: row.category_id,
+        category: row.category,
+        paymentMethod: row.payment_method,
+        note: row.note,
+        transactionDate: row.transaction_date,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }))
+
+      setTransactions((prev) => [...formattedInserted, ...prev])
+    }
+  }
+
   // Derived Calculations
   const filteredTransactions = useMemo(
     () =>
@@ -471,6 +520,10 @@ export function useDashboard() {
     setShowWhatsAppModal,
     showReceiptModal,
     setShowReceiptModal,
+    showBankImportModal,
+    setShowBankImportModal,
+    handleReceiptExtracted,
+    handleImportBankTransactions,
     userPhoneNumber,
     setUserPhoneNumber,
 
