@@ -10,7 +10,21 @@ export interface Category {
   icon: string
   color: string
   isDefault: boolean
+  monthlyBudget?: number | null
   createdAt?: string
+}
+
+export interface SavingsGoal {
+  id: string
+  userId: string
+  name: string
+  targetAmount: number
+  currentAmount: number
+  color: string
+  icon: string
+  targetDate?: string | null
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface Transaction {

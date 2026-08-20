@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { supabase, signOut } from '../lib/supabase'
-import type { Transaction, Category, TransactionType, PaymentMethod } from '../types'
+import type { Transaction, Category, TransactionType, PaymentMethod, SavingsGoal } from '../types'
 import {
   calculateDashboardStats,
   calculateCategoryBreakdown,
   calculateMonthlyTrend,
+  calculateCategoryBudgets,
   filterDashboardTransactions,
 } from '../lib/dashboardUtils'
 
@@ -19,6 +20,7 @@ export function useDashboard() {
   // Domain State
   const [categories, setCategories] = useState<Category[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([])
 
   // Filter State
   const [selectedMonth, setSelectedMonth] = useState<string>(
@@ -39,6 +41,10 @@ export function useDashboard() {
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
   const [showReceiptModal, setShowReceiptModal] = useState(false)
   const [showBankImportModal, setShowBankImportModal] = useState(false)
+  const [showBudgetModal, setShowBudgetModal] = useState(false)
+  const [showSavingsGoalModal, setShowSavingsGoalModal] = useState(false)
+  const [savingsGoalModalMode, setSavingsGoalModalMode] = useState<'CREATE' | 'EDIT' | 'DEPOSIT'>('CREATE')
+  const [targetDepositGoal, setTargetDepositGoal] = useState<SavingsGoal | null>(null)
 
   // Form State - New Transaction
   const [txAmount, setTxAmount] = useState('')
@@ -97,12 +103,32 @@ export function useDashboard() {
       }
     }
 
+    const loadLocalFallback = () => {
+      try {
+        const localGoals = localStorage.getItem('meyker_savings_goals')
+        if (localGoals) {
+          setSavingsGoals(JSON.parse(localGoals))
+        }
+        const localBudgets = localStorage.getItem('meyker_category_budgets')
+        if (localBudgets) {
+          const map: Record<string, number> = JSON.parse(localBudgets)
+          setCategories((prev) =>
+            prev.map((c) => (map[c.id] !== undefined ? { ...c, monthlyBudget: map[c.id] } : c))
+          )
+        }
+      } catch (e) {
+        // ignore JSON parse errors
+      }
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoadingAuth(false)
 
       if (session?.user) {
         fetchUserData(session.user.id)
+      } else {
+        loadLocalFallback()
       }
     })
 
@@ -111,6 +137,8 @@ export function useDashboard() {
       setLoadingAuth(false)
       if (session?.user) {
         fetchUserData(session.user.id)
+      } else {
+        loadLocalFallback()
       }
     })
 
@@ -165,8 +193,31 @@ export function useDashboard() {
           icon: c.icon,
           color: c.color,
           isDefault: c.is_default,
+          monthlyBudget: c.monthly_budget ? Number(c.monthly_budget) : null,
         }))
         setCategories(loadedCategories)
+      }
+
+      // Fetch Savings Goals
+      const { data: goalData } = await supabase
+        .from('savings_goals')
+        .select('*')
+        .eq('user_id', userId)
+
+      if (goalData && goalData.length > 0) {
+        setSavingsGoals(
+          goalData.map((g: any) => ({
+            id: g.id,
+            userId: g.user_id,
+            name: g.name,
+            targetAmount: Number(g.target_amount),
+            currentAmount: Number(g.current_amount),
+            color: g.color,
+            icon: g.icon,
+            targetDate: g.target_date,
+            createdAt: g.created_at,
+          }))
+        )
       }
 
       // Fetch Transactions
@@ -427,6 +478,7 @@ export function useDashboard() {
       payment_method: t.paymentMethod,
       note: t.note,
       transaction_date: t.date,
+      source: 'IMPORT',
     }))
 
     const { data: inserted, error } = await supabase
@@ -437,7 +489,7 @@ export function useDashboard() {
     if (error) throw error
 
     if (inserted) {
-      const formattedInserted = inserted.map((row: any) => ({
+      const formattedInserted: Transaction[] = inserted.map((row: any) => ({
         id: row.id,
         userId: row.user_id,
         amount: Number(row.amount),
@@ -446,6 +498,7 @@ export function useDashboard() {
         category: row.category,
         paymentMethod: row.payment_method,
         note: row.note,
+        source: row.source || 'IMPORT',
         transactionDate: row.transaction_date,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
@@ -483,6 +536,176 @@ export function useDashboard() {
     [transactions]
   )
 
+  const categoryBudgetsData = useMemo(
+    () => calculateCategoryBudgets(transactions, dateRange || selectedMonth, categories),
+    [transactions, dateRange, selectedMonth, categories]
+  )
+
+  const handleSaveCategoryBudgets = async (updatedMap: Record<string, number | null>) => {
+    let nextCategories: Category[] = []
+    setCategories((prev) => {
+      nextCategories = prev.map((c) => {
+        if (updatedMap[c.id] !== undefined) {
+          return { ...c, monthlyBudget: updatedMap[c.id] }
+        }
+        return c
+      })
+      return nextCategories
+    })
+
+    try {
+      const budgetMap: Record<string, number | null> = {}
+      nextCategories.forEach((c) => {
+        if (c.monthlyBudget) budgetMap[c.id] = c.monthlyBudget
+      })
+      localStorage.setItem('meyker_category_budgets', JSON.stringify(budgetMap))
+    } catch (e) {}
+
+    if (user) {
+      for (const [catId, budgetVal] of Object.entries(updatedMap)) {
+        const { error } = await supabase
+          .from('categories')
+          .update({ monthly_budget: budgetVal })
+          .eq('id', catId)
+
+        if (error) {
+          console.error('[Dashboard DB Error] Failed to update category budget:', error.message || error)
+        }
+      }
+    }
+  }
+
+  const handleCreateSavingsGoal = async (goal: {
+    name: string
+    targetAmount: number
+    initialDeposit: number
+    color: string
+    targetDate?: string | null
+  }) => {
+    const newGoal: SavingsGoal = {
+      id: `goal-${Date.now()}`,
+      userId: user?.id || 'demo-user',
+      name: goal.name,
+      targetAmount: goal.targetAmount,
+      currentAmount: goal.initialDeposit,
+      color: goal.color,
+      icon: 'Target',
+      targetDate: goal.targetDate,
+      createdAt: new Date().toISOString(),
+    }
+
+    setSavingsGoals((prev) => {
+      const next = [newGoal, ...prev]
+      try {
+        localStorage.setItem('meyker_savings_goals', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user) {
+      const { data, error } = await supabase
+        .from('savings_goals')
+        .insert({
+          user_id: user.id,
+          name: goal.name,
+          target_amount: goal.targetAmount,
+          current_amount: goal.initialDeposit,
+          color: goal.color,
+          icon: 'Target',
+          target_date: goal.targetDate,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to create savings goal:', error.message || error)
+      } else if (data) {
+        setSavingsGoals((prev) => {
+          const next = prev.map((g) => (g.id === newGoal.id ? { ...g, id: data.id } : g))
+          try {
+            localStorage.setItem('meyker_savings_goals', JSON.stringify(next))
+          } catch (e) {}
+          return next
+        })
+      }
+    }
+  }
+
+  const handleDepositSavingsGoal = async (goalId: string, depositAmount: number) => {
+    let updatedGoal: SavingsGoal | undefined
+    setSavingsGoals((prev) => {
+      const next = prev.map((g) => {
+        if (g.id === goalId) {
+          const updated = { ...g, currentAmount: g.currentAmount + depositAmount }
+          updatedGoal = updated
+          return updated
+        }
+        return g
+      })
+      try {
+        localStorage.setItem('meyker_savings_goals', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user && updatedGoal) {
+      const { error } = await supabase
+        .from('savings_goals')
+        .update({ current_amount: updatedGoal.currentAmount })
+        .eq('id', goalId)
+
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to update savings goal deposit:', error.message || error)
+      }
+    }
+  }
+
+  const handleUpdateSavingsGoal = async (
+    goalId: string,
+    fields: { name: string; targetAmount: number; currentAmount: number; color: string }
+  ) => {
+    setSavingsGoals((prev) => {
+      const next = prev.map((g) => (g.id === goalId ? { ...g, ...fields } : g))
+      try {
+        localStorage.setItem('meyker_savings_goals', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user) {
+      const { error } = await supabase
+        .from('savings_goals')
+        .update({
+          name: fields.name,
+          target_amount: fields.targetAmount,
+          current_amount: fields.currentAmount,
+          color: fields.color,
+        })
+        .eq('id', goalId)
+
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to update savings goal:', error.message || error)
+      }
+    }
+  }
+
+  const handleDeleteSavingsGoal = async (goalId: string) => {
+    setSavingsGoals((prev) => {
+      const next = prev.filter((g) => g.id !== goalId)
+      try {
+        localStorage.setItem('meyker_savings_goals', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user) {
+      const { error } = await supabase.from('savings_goals').delete().eq('id', goalId)
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to delete savings goal:', error.message || error)
+      }
+    }
+  }
+
   return {
     navigate,
     user,
@@ -496,6 +719,8 @@ export function useDashboard() {
     stats,
     categoryBreakdownData,
     monthlyTrendData,
+    categoryBudgetsData,
+    savingsGoals,
 
     // Filter State
     selectedMonth,
@@ -522,6 +747,14 @@ export function useDashboard() {
     setShowReceiptModal,
     showBankImportModal,
     setShowBankImportModal,
+    showBudgetModal,
+    setShowBudgetModal,
+    showSavingsGoalModal,
+    setShowSavingsGoalModal,
+    savingsGoalModalMode,
+    setSavingsGoalModalMode,
+    targetDepositGoal,
+    setTargetDepositGoal,
     handleReceiptExtracted,
     handleImportBankTransactions,
     userPhoneNumber,
@@ -553,6 +786,10 @@ export function useDashboard() {
     handleCreateTransaction,
     handleCreateCategory,
     handleDeleteTransaction,
-    handleReceiptExtracted,
+    handleSaveCategoryBudgets,
+    handleCreateSavingsGoal,
+    handleDepositSavingsGoal,
+    handleUpdateSavingsGoal,
+    handleDeleteSavingsGoal,
   }
 }
