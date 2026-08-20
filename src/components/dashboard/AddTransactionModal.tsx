@@ -4,6 +4,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
+import { DatePicker } from '../ui/date-picker'
 
 interface AddTransactionModalProps {
   isOpen: boolean
@@ -109,13 +110,7 @@ export function AddTransactionModal({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="block text-xs font-medium text-gray-300">Date</label>
-              <Input
-                name="date"
-                type="date"
-                value={txDate}
-                onChange={(e) => setTxDate(e.target.value)}
-                className="bg-gray-900 border-gray-800 text-white"
-              />
+              <DatePicker value={txDate} onChange={setTxDate} />
             </div>
             <div className="space-y-1">
               <label className="block text-xs font-medium text-gray-300">Payment Method</label>
