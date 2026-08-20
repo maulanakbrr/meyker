@@ -200,3 +200,25 @@ export function isDateInRange(txDateStr: string, range: DateFilterRange): boolea
 
   return true
 }
+
+/**
+ * Format a human-readable period label for PDF reports and headers based on DateFilterRange
+ */
+export function getDateFilterPeriodLabel(range: DateFilterRange): string {
+  if (!range || range.preset === 'ALL_TIME') return 'All Time'
+
+  if (range.startDate && range.endDate) {
+    if (range.startDate === range.endDate) {
+      if (range.preset === 'TODAY') {
+        return `Today (${formatShortDate(range.startDate)})`
+      }
+      if (range.preset === 'YESTERDAY') {
+        return `Yesterday (${formatShortDate(range.startDate)})`
+      }
+      return formatShortDate(range.startDate)
+    }
+    return `${formatShortDate(range.startDate)} to ${formatShortDate(range.endDate)}`
+  }
+
+  return range.label || 'All Time'
+}
