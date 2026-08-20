@@ -14,8 +14,8 @@ describe('BankStatementImportModal', () => {
       />
     )
 
-    expect(screen.getByText(/import bank statement \(csv \/ excel\)/i)).toBeInTheDocument()
-    expect(screen.getByText(/drag & drop your bank statement file/i)).toBeInTheDocument()
+    expect(screen.getByText(/import transactions \(csv \/ excel\)/i)).toBeInTheDocument()
+    expect(screen.getByText(/need a sample file structure\? download a template/i)).toBeInTheDocument()
   })
 
   it('does not render when closed', () => {

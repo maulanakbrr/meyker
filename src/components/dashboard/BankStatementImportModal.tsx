@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileSpreadsheet, Check, AlertCircle, Building2, Upload, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { FileSpreadsheet, Check, AlertCircle, Building2, Upload, ArrowRight, CheckCircle2, Download } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { FileDropzone } from '../ui/file-dropzone'
 import { Button } from '../ui/button'
@@ -8,6 +8,9 @@ import {
   detectBankFormat,
   parseFileRows,
   mapRowsToTransactions,
+  downloadImportTemplateCSV,
+  downloadImportTemplateXLSX,
+  matchCategoryForTransaction,
   type BankFormatPreset,
   type ColumnMapping,
   type ParsedBankTransaction,
@@ -30,11 +33,11 @@ interface BankStatementImportModalProps {
 
 const BANK_PRESETS: { key: BankFormatPreset; label: string }[] = [
   { key: 'AUTO', label: '⚡ Auto Detect Format' },
+  { key: 'GENERIC', label: 'Standard CSV / Excel Template' },
   { key: 'BCA', label: 'BCA (myBCA / KlikBCA)' },
   { key: 'MANDIRI', label: 'Mandiri (Livin\' by Mandiri)' },
   { key: 'BRI', label: 'BRI (BRImo)' },
   { key: 'CIMB', label: 'CIMB Niaga' },
-  { key: 'GENERIC', label: 'Standard CSV / Excel' },
   { key: 'CUSTOM', label: 'Custom Column Mapping' },
 ]
 
@@ -89,11 +92,10 @@ export function BankStatementImportModal({
       setParsedTransactions(txs)
       setSelectedTxIds(new Set(txs.filter((t) => t.isValid).map((t) => t.id)))
 
-      // Assign default category
-      const defaultCatId = categories[0]?.id || ''
+      // Intelligently assign category matching note / category column
       const initialCatMap: Record<string, string> = {}
       txs.forEach((t) => {
-        initialCatMap[t.id] = defaultCatId
+        initialCatMap[t.id] = matchCategoryForTransaction(t, categories)
       })
       setCategoryAssignments(initialCatMap)
     } catch (err: any) {
@@ -117,6 +119,12 @@ export function BankStatementImportModal({
     const txs = mapRowsToTransactions(rawRows, newMapping)
     setParsedTransactions(txs)
     setSelectedTxIds(new Set(txs.filter((t) => t.isValid).map((t) => t.id)))
+
+    const initialCatMap: Record<string, string> = {}
+    txs.forEach((t) => {
+      initialCatMap[t.id] = matchCategoryForTransaction(t, categories)
+    })
+    setCategoryAssignments(initialCatMap)
   }
 
   const handleMappingFieldChange = (field: keyof ColumnMapping, colName: string) => {
@@ -127,6 +135,12 @@ export function BankStatementImportModal({
     const txs = mapRowsToTransactions(rawRows, updatedMapping)
     setParsedTransactions(txs)
     setSelectedTxIds(new Set(txs.filter((t) => t.isValid).map((t) => t.id)))
+
+    const initialCatMap: Record<string, string> = {}
+    txs.forEach((t) => {
+      initialCatMap[t.id] = matchCategoryForTransaction(t, categories)
+    })
+    setCategoryAssignments(initialCatMap)
   }
 
   const toggleSelectTx = (id: string) => {
@@ -204,25 +218,54 @@ export function BankStatementImportModal({
             </div>
             <div>
               <DialogTitle className="text-white text-base font-bold">
-                Import Bank Statement (CSV / Excel)
+                Import Transactions (CSV / Excel)
               </DialogTitle>
               <p className="text-xs text-gray-400">
-                Upload BCA, Mandiri, BRI, CIMB, or custom CSV/Excel statement with auto-mapping
+                Upload CSV/Excel spreadsheet to batch import transactions into your account
               </p>
             </div>
           </div>
         </DialogHeader>
 
-        {/* Step 1: File Dropzone */}
+        {/* Step 1: File Dropzone & Download Template */}
         {!selectedFile && (
           <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-gray-900 border border-gray-800 text-xs">
+              <div className="flex items-center gap-2 text-gray-300">
+                <Download className="w-4 h-4 text-indigo-400 shrink-0" />
+                <span>Need a sample file structure? Download a template:</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadImportTemplateCSV}
+                  leftIcon={<Download className="w-3.5 h-3.5 text-indigo-400" />}
+                  className="bg-gray-950 border-gray-800 text-gray-200 text-[11px] h-7"
+                >
+                  CSV Template
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadImportTemplateXLSX}
+                  leftIcon={<Download className="w-3.5 h-3.5 text-emerald-400" />}
+                  className="bg-gray-950 border-gray-800 text-gray-200 text-[11px] h-7"
+                >
+                  XLSX Template
+                </Button>
+              </div>
+            </div>
+
             <FileDropzone
               onFileSelect={handleFileSelect}
               accept=".csv,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               maxSizeMB={10}
               isProcessing={isProcessingFile}
-              label="Drag & drop your bank statement file (CSV or XLSX)"
-              hint="Supports BCA, Mandiri, BRI, CIMB, and generic CSV up to 10MB"
+              label="Drag & drop your CSV or Excel file here"
+              hint="Supports CSV and XLSX formats up to 10MB"
             />
           </div>
         )}

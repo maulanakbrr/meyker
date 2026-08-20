@@ -41,7 +41,7 @@ export function DashboardControls({
           leftIcon={<FileSpreadsheet className="w-3.5 h-3.5 text-indigo-400" />}
           className="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
         >
-          Import Bank
+          Import CSV / Excel
         </Button>
 
         <Button

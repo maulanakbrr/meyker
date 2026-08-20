@@ -3,7 +3,9 @@ import {
   detectBankFormat,
   mapRowsToTransactions,
   parseFlexibleDate,
+  matchCategoryForTransaction,
 } from '../bankStatementParser'
+import { DEFAULT_CATEGORIES } from '../../db/schema'
 
 describe('bankStatementParser', () => {
   it('correctly auto-detects BCA statement headers', () => {
@@ -63,9 +65,24 @@ describe('bankStatementParser', () => {
     expect(txs[1].type).toBe('EXPENSE')
   })
 
+  it('intelligently matches category by row Category value or description keywords', () => {
+    const foodCat = DEFAULT_CATEGORIES.find((c) => c.name === 'Food & Dining')!
+    const salaryCat = DEFAULT_CATEGORIES.find((c) => c.name === 'Salary & Wages')!
+    const transportCat = DEFAULT_CATEGORIES.find((c) => c.name === 'Transport & Fuel')!
+
+    const txFood = { id: '1', date: '2026-08-20', note: 'Warung Makan', amount: 50000, type: 'EXPENSE' as const, rawRow: {}, isValid: true }
+    const txSalary = { id: '2', date: '2026-08-21', note: 'Gaji Bulanan', amount: 5000000, type: 'INCOME' as const, rawRow: {}, isValid: true }
+    const txTransport = { id: '3', date: '2026-08-22', note: 'Gojek ride', amount: 25000, type: 'EXPENSE' as const, rawRow: { Category: 'Transport & Fuel' }, isValid: true }
+
+    expect(matchCategoryForTransaction(txFood, DEFAULT_CATEGORIES)).toBe(foodCat.id)
+    expect(matchCategoryForTransaction(txSalary, DEFAULT_CATEGORIES)).toBe(salaryCat.id)
+    expect(matchCategoryForTransaction(txTransport, DEFAULT_CATEGORIES)).toBe(transportCat.id)
+  })
+
   it('parses flexible date strings accurately', () => {
     expect(parseFlexibleDate('20/08/2026')).toBe('2026-08-20')
     expect(parseFlexibleDate('2026-08-20')).toBe('2026-08-20')
     expect(parseFlexibleDate('01/12/2025')).toBe('2025-12-01')
   })
 })
+

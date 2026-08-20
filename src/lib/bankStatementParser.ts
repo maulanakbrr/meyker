@@ -25,13 +25,51 @@ export interface ParsedBankTransaction {
   validationError?: string
 }
 
-export interface ParseBankStatementResult {
-  detectedPreset: BankFormatPreset
-  mapping: ColumnMapping
-  transactions: ParsedBankTransaction[]
-  headers: string[]
-  totalRows: number
-  validRows: number
+export async function downloadImportTemplateCSV() {
+  const headers = ['Date', 'Type', 'Amount', 'Category', 'Payment Method', 'Note']
+  const sampleRows = [
+    ['2026-08-20', 'EXPENSE', '150000', 'Food & Dining', 'CASH', 'Lunch at Resto Bu Agus'],
+    ['2026-08-21', 'INCOME', '5000000', 'Salary & Wages', 'BANK_TRANSFER', 'Monthly Salary Payment'],
+    ['2026-08-22', 'EXPENSE', '45000', 'Transport & Fuel', 'E_WALLET', 'Gojek ride to office'],
+  ]
+
+  const csvContent = [headers.join(','), ...sampleRows.map((r) => r.join(','))].join('\n')
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'meyker_import_template.csv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export async function downloadImportTemplateXLSX() {
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Transactions')
+
+  worksheet.columns = [
+    { header: 'Date', key: 'date', width: 15 },
+    { header: 'Type', key: 'type', width: 12 },
+    { header: 'Amount', key: 'amount', width: 15 },
+    { header: 'Category', key: 'category', width: 20 },
+    { header: 'Payment Method', key: 'paymentMethod', width: 18 },
+    { header: 'Note', key: 'note', width: 30 },
+  ]
+
+  worksheet.addRows([
+    { date: '2026-08-20', type: 'EXPENSE', amount: 150000, category: 'Food & Dining', paymentMethod: 'CASH', note: 'Lunch at Resto Bu Agus' },
+    { date: '2026-08-21', type: 'INCOME', amount: 5000000, category: 'Salary & Wages', paymentMethod: 'BANK_TRANSFER', note: 'Monthly Salary Payment' },
+    { date: '2026-08-22', type: 'EXPENSE', amount: 45000, category: 'Transport & Fuel', paymentMethod: 'E_WALLET', note: 'Gojek ride to office' },
+  ])
+
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'meyker_import_template.xlsx'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 /**
@@ -308,4 +346,125 @@ export function parseFlexibleDate(rawDateStr: string): string | null {
   }
 
   return null
+}
+
+/**
+ * Intelligently match category for a parsed bank transaction based on Category column or note keywords
+ */
+export function matchCategoryForTransaction(
+  tx: ParsedBankTransaction,
+  categories: { id: string; name: string; type: 'INCOME' | 'EXPENSE' }[]
+): string {
+  if (!categories || categories.length === 0) return ''
+
+  // 1. Check if raw row has a Category / Kategori column value
+  const rawCatName =
+    tx.rawRow?.Category ||
+    tx.rawRow?.category ||
+    tx.rawRow?.Kategori ||
+    tx.rawRow?.kategori ||
+    tx.rawRow?.['Category Name']
+
+  if (rawCatName) {
+    const target = String(rawCatName).trim().toLowerCase()
+    const matchedByName = categories.find((c) => c.name.toLowerCase() === target || c.name.toLowerCase().includes(target))
+    if (matchedByName) return matchedByName.id
+  }
+
+  // 2. Intelligent Keyword Matching from Note / Description
+  const descLower = tx.note.toLowerCase()
+
+  if (
+    descLower.includes('gaji') ||
+    descLower.includes('salary') ||
+    descLower.includes('payroll') ||
+    descLower.includes('paycheck')
+  ) {
+    const c = categories.find(
+      (cat) => cat.name.toLowerCase().includes('salary') || cat.name.toLowerCase().includes('gaji')
+    )
+    if (c) return c.id
+  }
+
+  if (
+    descLower.includes('freelance') ||
+    descLower.includes('project') ||
+    descLower.includes('client') ||
+    descLower.includes('invoice') ||
+    descLower.includes('business')
+  ) {
+    const c = categories.find(
+      (cat) => cat.name.toLowerCase().includes('freelance') || cat.name.toLowerCase().includes('business')
+    )
+    if (c) return c.id
+  }
+
+  if (
+    descLower.includes('gojek') ||
+    descLower.includes('grab') ||
+    descLower.includes('bensin') ||
+    descLower.includes('pertamina') ||
+    descLower.includes('shell') ||
+    descLower.includes('parkir') ||
+    descLower.includes('toll') ||
+    descLower.includes('transport')
+  ) {
+    const c = categories.find(
+      (cat) => cat.name.toLowerCase().includes('transport') || cat.name.toLowerCase().includes('fuel')
+    )
+    if (c) return c.id
+  }
+
+  if (
+    descLower.includes('kopi') ||
+    descLower.includes('resto') ||
+    descLower.includes('makan') ||
+    descLower.includes('food') ||
+    descLower.includes('cafe') ||
+    descLower.includes('starbucks') ||
+    descLower.includes('warung') ||
+    descLower.includes('bakso') ||
+    descLower.includes('lunch') ||
+    descLower.includes('dinner')
+  ) {
+    const c = categories.find(
+      (cat) => cat.name.toLowerCase().includes('food') || cat.name.toLowerCase().includes('dining')
+    )
+    if (c) return c.id
+  }
+
+  if (
+    descLower.includes('listrik') ||
+    descLower.includes('pln') ||
+    descLower.includes('air') ||
+    descLower.includes('pdam') ||
+    descLower.includes('internet') ||
+    descLower.includes('indihome') ||
+    descLower.includes('pulsa') ||
+    descLower.includes('tokopedia') ||
+    descLower.includes('bills')
+  ) {
+    const c = categories.find(
+      (cat) => cat.name.toLowerCase().includes('utilities') || cat.name.toLowerCase().includes('bills')
+    )
+    if (c) return c.id
+  }
+
+  if (
+    descLower.includes('sewa') ||
+    descLower.includes('rent') ||
+    descLower.includes('kos') ||
+    descLower.includes('rumah')
+  ) {
+    const c = categories.find(
+      (cat) => cat.name.toLowerCase().includes('housing') || cat.name.toLowerCase().includes('rent')
+    )
+    if (c) return c.id
+  }
+
+  // 3. Fallback matching transaction type (INCOME vs EXPENSE)
+  const matchingTypeCat = categories.find((c) => c.type === tx.type)
+  if (matchingTypeCat) return matchingTypeCat.id
+
+  return categories[0]?.id || ''
 }
