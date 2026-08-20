@@ -20,7 +20,7 @@ import type { Category } from '../../types'
 interface BankStatementImportModalProps {
   isOpen: boolean
   onClose: () => void
-  categories: Category[]
+  categories: readonly Category[] | readonly { id?: string; name: string; type: string }[]
   onImportTransactions: (transactions: {
     date: string
     amount: number

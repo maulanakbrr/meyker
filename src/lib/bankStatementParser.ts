@@ -353,7 +353,7 @@ export function parseFlexibleDate(rawDateStr: string): string | null {
  */
 export function matchCategoryForTransaction(
   tx: ParsedBankTransaction,
-  categories: { id: string; name: string; type: 'INCOME' | 'EXPENSE' }[]
+  categories: readonly { id?: string; name: string; type: string }[]
 ): string {
   if (!categories || categories.length === 0) return ''
 
@@ -368,7 +368,7 @@ export function matchCategoryForTransaction(
   if (rawCatName) {
     const target = String(rawCatName).trim().toLowerCase()
     const matchedByName = categories.find((c) => c.name.toLowerCase() === target || c.name.toLowerCase().includes(target))
-    if (matchedByName) return matchedByName.id
+    if (matchedByName) return matchedByName.id || matchedByName.name
   }
 
   // 2. Intelligent Keyword Matching from Note / Description
@@ -383,7 +383,7 @@ export function matchCategoryForTransaction(
     const c = categories.find(
       (cat) => cat.name.toLowerCase().includes('salary') || cat.name.toLowerCase().includes('gaji')
     )
-    if (c) return c.id
+    if (c) return c.id || c.name
   }
 
   if (
@@ -396,7 +396,7 @@ export function matchCategoryForTransaction(
     const c = categories.find(
       (cat) => cat.name.toLowerCase().includes('freelance') || cat.name.toLowerCase().includes('business')
     )
-    if (c) return c.id
+    if (c) return c.id || c.name
   }
 
   if (
@@ -412,7 +412,7 @@ export function matchCategoryForTransaction(
     const c = categories.find(
       (cat) => cat.name.toLowerCase().includes('transport') || cat.name.toLowerCase().includes('fuel')
     )
-    if (c) return c.id
+    if (c) return c.id || c.name
   }
 
   if (
@@ -430,7 +430,7 @@ export function matchCategoryForTransaction(
     const c = categories.find(
       (cat) => cat.name.toLowerCase().includes('food') || cat.name.toLowerCase().includes('dining')
     )
-    if (c) return c.id
+    if (c) return c.id || c.name
   }
 
   if (
@@ -447,7 +447,7 @@ export function matchCategoryForTransaction(
     const c = categories.find(
       (cat) => cat.name.toLowerCase().includes('utilities') || cat.name.toLowerCase().includes('bills')
     )
-    if (c) return c.id
+    if (c) return c.id || c.name
   }
 
   if (
@@ -459,12 +459,12 @@ export function matchCategoryForTransaction(
     const c = categories.find(
       (cat) => cat.name.toLowerCase().includes('housing') || cat.name.toLowerCase().includes('rent')
     )
-    if (c) return c.id
+    if (c) return c.id || c.name
   }
 
   // 3. Fallback matching transaction type (INCOME vs EXPENSE)
   const matchingTypeCat = categories.find((c) => c.type === tx.type)
-  if (matchingTypeCat) return matchingTypeCat.id
+  if (matchingTypeCat) return matchingTypeCat.id || matchingTypeCat.name
 
-  return categories[0]?.id || ''
+  return categories[0]?.id || categories[0]?.name || ''
 }
