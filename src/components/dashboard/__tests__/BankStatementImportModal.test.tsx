@@ -7,7 +7,7 @@ describe('BankStatementImportModal', () => {
   it('renders modal title and file dropzone when open', () => {
     render(
       <BankStatementImportModal
-        isOpen={true}
+        isOpen
         onClose={vi.fn()}
         categories={DEFAULT_CATEGORIES}
         onImportTransactions={vi.fn()}

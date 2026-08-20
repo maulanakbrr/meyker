@@ -17,6 +17,7 @@ describe('DashboardControls', () => {
         onOpenAddTxModal={vi.fn()}
         onOpenWhatsAppModal={vi.fn()}
         onOpenReceiptModal={vi.fn()}
+        onOpenBankImportModal={vi.fn()}
       />
     )
 
