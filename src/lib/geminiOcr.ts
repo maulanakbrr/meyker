@@ -235,6 +235,10 @@ export function cleanIdrAmountString(rawStr: string | number): number {
   if (!rawStr) return 0
   let str = String(rawStr).trim()
 
+  // 0. Strip trailing/leading mutasi & currency tags (e.g. "CR", "DB", "KREDIT", "DEBET", "IDR", "RP")
+  str = str.replace(/(?:CR|DB|KREDIT|DEBET|IDR|RP|\+|\-)\s*$/gi, '').trim()
+  str = str.replace(/^(?:IDR|RP)\s*/gi, '').trim()
+
   // 1. Strip trailing Indonesian cents (e.g. ",00", ",50", ",-")
   str = str.replace(/,[0-9]{2}$/, '').replace(/,-$/, '')
 

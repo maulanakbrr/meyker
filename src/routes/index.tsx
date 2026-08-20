@@ -14,6 +14,7 @@ import { CategoryManagementModal } from '../components/dashboard/CategoryManagem
 import { ExportModal } from '../components/dashboard/ExportModal'
 import { WhatsAppSettingsModal } from '../components/dashboard/WhatsAppSettingsModal'
 import { ReceiptUploadModal } from '../components/dashboard/ReceiptUploadModal'
+import { BankStatementImportModal } from '../components/dashboard/BankStatementImportModal'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -59,6 +60,7 @@ function DashboardPage() {
           onOpenAddTxModal={() => dashboard.setShowAddTxModal(true)}
           onOpenWhatsAppModal={() => dashboard.setShowWhatsAppModal(true)}
           onOpenReceiptModal={() => dashboard.setShowReceiptModal(true)}
+          onOpenBankImportModal={() => dashboard.setShowBankImportModal(true)}
         />
 
         {/* 3 Summary Stat Cards */}
@@ -143,6 +145,13 @@ function DashboardPage() {
         currentPhoneNumber={dashboard.userPhoneNumber}
         userId={dashboard.user.id}
         onPhoneUpdated={(newPhone) => dashboard.setUserPhoneNumber(newPhone)}
+      />
+
+      <BankStatementImportModal
+        isOpen={dashboard.showBankImportModal}
+        onClose={() => dashboard.setShowBankImportModal(false)}
+        categories={dashboard.categories}
+        onImportTransactions={dashboard.handleImportBankTransactions}
       />
     </div>
   )

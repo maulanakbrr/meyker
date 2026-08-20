@@ -47,9 +47,9 @@
 - **Real-time DB Synchronization**:
   - Instant Supabase DB entry logging (`source = 'WHATSAPP'`) and WhatsApp TwiML/Qiscus confirmation reply.
 
-### Phase 3: Imports, Advanced Sync & Reports (Future Roadmap)
-- **File Import Engine**:
-  - Bulk import from external bank statement CSV/Excel files with interactive column mapping UI.
+### Phase 3: Imports, Advanced Sync & Reports (In Progress)
+- **File Import Engine (Completed)**:
+  - Bulk import from external bank statement CSV/Excel files with bank format auto-detection (BCA, Mandiri, BRI, CIMB, Generic) and interactive column mapping UI.
 - **Monthly PDF Reports**:
   - Automated PDF export for monthly financial statements and tax summaries.
 - **Live Sync with Google Sheets API**:

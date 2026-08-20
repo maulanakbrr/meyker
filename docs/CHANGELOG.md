@@ -5,6 +5,20 @@ All notable changes to the **Meyker Financial Tracker** project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-08-20
+
+### 🎉 Added (Phase 3: Bank Statement & CSV/Excel Import)
+- **Bank Statement & CSV/Excel Import Engine**:
+  - Bulk import support for CSV and Excel (`.xlsx`) bank statements (`BankStatementImportModal.tsx`).
+  - Auto-detection preset mapping for major Indonesian banks (BCA, Mandiri, BRI, CIMB Niaga) as well as Generic CSV formats (`detectBankFormat`).
+  - Interactive column mapping preview with manual field selector fallback (`mapRowsToTransactions`).
+  - Intelligent category keyword auto-matching based on transaction description/note or row category hints (`matchCategoryForTransaction`).
+  - One-click sample import template generator for CSV and Excel formats (`downloadImportTemplateCSV`, `downloadImportTemplateXLSX`).
+- **Vitest Unit Test Coverage**:
+  - Unit test suite covering bank statement parser, format detection, date parsing, and modal UI (78 passing tests across 21 test files).
+
+---
+
 ## [0.2.1] - 2026-08-19
 
 ### ⚙️ Fixed & Improved

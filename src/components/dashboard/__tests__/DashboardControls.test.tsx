@@ -17,6 +17,7 @@ describe('DashboardControls', () => {
         onOpenAddTxModal={vi.fn()}
         onOpenWhatsAppModal={vi.fn()}
         onOpenReceiptModal={vi.fn()}
+        onOpenBankImportModal={vi.fn()}
       />
     )
 
@@ -29,6 +30,7 @@ describe('DashboardControls', () => {
     const handleOpenAddTx = vi.fn()
     const handleOpenWhatsApp = vi.fn()
     const handleOpenReceipt = vi.fn()
+    const handleOpenBankImport = vi.fn()
 
     render(
       <DashboardControls
@@ -39,8 +41,12 @@ describe('DashboardControls', () => {
         onOpenAddTxModal={handleOpenAddTx}
         onOpenWhatsAppModal={handleOpenWhatsApp}
         onOpenReceiptModal={handleOpenReceipt}
+        onOpenBankImportModal={handleOpenBankImport}
       />
     )
+
+    fireEvent.click(screen.getByRole('button', { name: /import csv \/ excel/i }))
+    expect(handleOpenBankImport).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByRole('button', { name: /scan receipt/i }))
     expect(handleOpenReceipt).toHaveBeenCalledTimes(1)

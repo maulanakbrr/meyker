@@ -20,7 +20,7 @@ This document tracks future feature ideas, operational notes, and roadmap items.
 - [ ] **Web App Receipt Image Upload**: Direct drag-and-drop image upload inside the web dashboard (extending OCR beyond WhatsApp).
 - [ ] **Enhanced Date & Year Filtering**: Expand dashboard filtering beyond monthly (`YYYY-MM`) to support exact date ranges, custom date pickers, and multi-year views.
 - [ ] **shadcn/ui Component Upgrade**: Upgrade native select dropdowns and UI components to official `shadcn/ui` patterns.
-- [ ] **Bank Statement CSV/Excel Import**: Interactive UI with drag-and-drop column mapping.
+- [x] **Bank Statement CSV/Excel Import**: Interactive UI with auto-preset detection (BCA, Mandiri, BRI, CIMB, Generic) and intelligent category keyword matching.
 - [ ] **Monthly PDF Statement Generator**: Export formatted monthly statements and category breakdowns.
 - [ ] **Google Sheets API Live Sync**: Two-way sync to specified Google Sheet spreadsheets via OAuth2.
 - [ ] **Savings Goals & Category Budgets**: Set spending limits per category and track progress toward savings targets.
