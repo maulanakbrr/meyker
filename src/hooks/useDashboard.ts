@@ -32,6 +32,7 @@ export function useDashboard() {
   const [showCatModal, setShowCatModal] = useState(false)
   const [showExportModal, setShowExportModal] = useState(false)
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false)
+  const [showReceiptModal, setShowReceiptModal] = useState(false)
 
   // Form State - New Transaction
   const [txAmount, setTxAmount] = useState('')
@@ -363,6 +364,43 @@ export function useDashboard() {
     setTransactions((prev) => prev.filter((t) => t.id !== id))
   }
 
+  // Handle Receipt Extracted Data Auto-Fill
+  const handleReceiptExtracted = (data: any) => {
+    if (data.amount && data.amount > 0) {
+      setTxAmount(String(data.amount))
+    }
+    if (data.type) {
+      setTxType(data.type)
+    }
+
+    // Try matching category by hint or default to first category of same type
+    if (data.categoryHint) {
+      const hintLower = data.categoryHint.toLowerCase()
+      const matchedCat = categories.find(
+        (c) => c.type === data.type && c.name.toLowerCase().includes(hintLower)
+      )
+      if (matchedCat) {
+        setTxCategory(matchedCat.id)
+      } else {
+        const fallbackCat = categories.find((c) => c.type === data.type)
+        if (fallbackCat) setTxCategory(fallbackCat.id)
+      }
+    }
+
+    if (data.transactionDate) {
+      setTxDate(data.transactionDate)
+    }
+    if (data.paymentMethod) {
+      setTxPaymentMethod(data.paymentMethod)
+    }
+    if (data.note || data.merchantName) {
+      setTxNote(data.note || (data.merchantName ? `Purchase at ${data.merchantName}` : 'Receipt Scan'))
+    }
+
+    setShowReceiptModal(false)
+    setShowAddTxModal(true)
+  }
+
   // Derived Calculations
   const filteredTransactions = useMemo(
     () =>
@@ -423,6 +461,8 @@ export function useDashboard() {
     setShowExportModal,
     showWhatsAppModal,
     setShowWhatsAppModal,
+    showReceiptModal,
+    setShowReceiptModal,
     userPhoneNumber,
     setUserPhoneNumber,
 
@@ -452,5 +492,6 @@ export function useDashboard() {
     handleCreateTransaction,
     handleCreateCategory,
     handleDeleteTransaction,
+    handleReceiptExtracted,
   }
 }
