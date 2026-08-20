@@ -53,9 +53,19 @@ export function AddTransactionModal({
 
         <form onSubmit={onSubmit} className="space-y-4 pt-2">
           <Tabs value={txType} onValueChange={(val) => setTxType(val as TransactionType)} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-gray-900 border border-gray-800">
-              <TabsTrigger value="EXPENSE">Expense</TabsTrigger>
-              <TabsTrigger value="INCOME">Income</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-gray-900 border border-gray-800 p-1 rounded-xl">
+              <TabsTrigger
+                value="EXPENSE"
+                className="cursor-pointer font-semibold py-2 text-xs text-gray-400 data-[state=active]:bg-rose-600 data-[state=active]:text-white transition-all"
+              >
+                Expense
+              </TabsTrigger>
+              <TabsTrigger
+                value="INCOME"
+                className="cursor-pointer font-semibold py-2 text-xs text-gray-400 data-[state=active]:bg-emerald-600 data-[state=active]:text-white transition-all"
+              >
+                Income
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
