@@ -159,3 +159,95 @@ export function filterDashboardTransactions(
     return true
   })
 }
+
+export interface CategoryBudgetProgress {
+  categoryId: string
+  categoryName: string
+  color: string
+  icon: string
+  spent: number
+  limit: number
+  percentage: number
+  status: 'HEALTHY' | 'CAUTION' | 'EXCEEDED'
+  exceededAmount: number
+}
+
+/**
+ * Calculate spending progress for categories that have a monthlyBudget set
+ */
+export function calculateCategoryBudgets(
+  transactions: Transaction[],
+  selectedMonthOrRange: string | DateFilterRange,
+  categories: Category[]
+): CategoryBudgetProgress[] {
+  const expenseTxs = transactions.filter((tx) => {
+    if (tx.type !== 'EXPENSE') return false
+    if (typeof selectedMonthOrRange === 'string') {
+      return getTxMonthKey(tx.transactionDate) === selectedMonthOrRange
+    }
+    return isDateInRange(tx.transactionDate, selectedMonthOrRange)
+  })
+
+  const spentMap: Record<string, number> = {}
+  expenseTxs.forEach((tx) => {
+    if (tx.categoryId) {
+      spentMap[tx.categoryId] = (spentMap[tx.categoryId] || 0) + Number(tx.amount)
+    }
+  })
+
+  const budgetedCategories = categories.filter(
+    (c) => c.type === 'EXPENSE' && c.monthlyBudget !== undefined && c.monthlyBudget !== null && Number(c.monthlyBudget) > 0
+  )
+
+  return budgetedCategories.map((cat) => {
+    const limit = Number(cat.monthlyBudget)
+    const spent = spentMap[cat.id] || 0
+    const percentage = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 999) : 0
+    const exceededAmount = Math.max(0, spent - limit)
+
+    let status: 'HEALTHY' | 'CAUTION' | 'EXCEEDED' = 'HEALTHY'
+    if (spent >= limit) {
+      status = 'EXCEEDED'
+    } else if (percentage >= 75) {
+      status = 'CAUTION'
+    }
+
+    return {
+      categoryId: cat.id,
+      categoryName: cat.name,
+      color: cat.color,
+      icon: cat.icon,
+      spent,
+      limit,
+      percentage,
+      status,
+      exceededAmount,
+    }
+  })
+}
+
+export interface SavingsGoalProgress {
+  percentage: number
+  remainingAmount: number
+  isCompleted: boolean
+}
+
+/**
+ * Calculate progress percentage and remaining amount for a savings goal
+ */
+export function calculateSavingsGoalProgress(
+  targetAmount: number,
+  currentAmount: number
+): SavingsGoalProgress {
+  const target = Number(targetAmount) || 0
+  const current = Number(currentAmount) || 0
+  const percentage = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0
+  const remainingAmount = Math.max(0, target - current)
+  const isCompleted = current >= target
+
+  return {
+    percentage,
+    remainingAmount,
+    isCompleted,
+  }
+}

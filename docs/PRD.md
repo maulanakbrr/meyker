@@ -54,8 +54,8 @@
   - Automated client-side PDF export for branded monthly financial statements, KPI metrics, category breakdowns, and tax summaries (`jsPDF` + `jspdf-autotable`).
 - **Live Sync with Google Sheets API**:
   - Two-way live synchronization using Google Sheets API (OAuth2).
-- **Savings Goals & Category Budgets**:
-  - Target budgets per category and savings goal tracker.
+- **Savings Goals & Category Budgets (Completed)**:
+  - Monthly spending caps per category with visual health bars and personal savings goals tracker with quick deposit contribution support.
 
 ---
 

@@ -16,6 +16,10 @@ import { ExportModal } from '../components/dashboard/ExportModal'
 import { WhatsAppSettingsModal } from '../components/dashboard/WhatsAppSettingsModal'
 import { ReceiptUploadModal } from '../components/dashboard/ReceiptUploadModal'
 import { BankStatementImportModal } from '../components/dashboard/BankStatementImportModal'
+import { CategoryBudgetCard } from '../components/dashboard/CategoryBudgetCard'
+import { SavingsGoalsCard } from '../components/dashboard/SavingsGoalsCard'
+import { CategoryBudgetModal } from '../components/dashboard/CategoryBudgetModal'
+import { SavingsGoalModal } from '../components/dashboard/SavingsGoalModal'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -62,10 +66,41 @@ function DashboardPage() {
           onOpenWhatsAppModal={() => dashboard.setShowWhatsAppModal(true)}
           onOpenReceiptModal={() => dashboard.setShowReceiptModal(true)}
           onOpenBankImportModal={() => dashboard.setShowBankImportModal(true)}
+          onOpenBudgetModal={() => dashboard.setShowBudgetModal(true)}
+          onOpenSavingsGoalModal={() => {
+            dashboard.setTargetDepositGoal(null)
+            dashboard.setShowSavingsGoalModal(true)
+          }}
         />
 
         {/* 3 Summary Stat Cards */}
         <StatCards stats={dashboard.stats} />
+
+        {/* Category Budgets & Savings Goals Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CategoryBudgetCard
+            budgets={dashboard.categoryBudgetsData}
+            onOpenBudgetModal={() => dashboard.setShowBudgetModal(true)}
+          />
+          <SavingsGoalsCard
+            goals={dashboard.savingsGoals}
+            onOpenCreateGoalModal={() => {
+              dashboard.setSavingsGoalModalMode('CREATE')
+              dashboard.setTargetDepositGoal(null)
+              dashboard.setShowSavingsGoalModal(true)
+            }}
+            onOpenDepositModal={(goal) => {
+              dashboard.setSavingsGoalModalMode('DEPOSIT')
+              dashboard.setTargetDepositGoal(goal)
+              dashboard.setShowSavingsGoalModal(true)
+            }}
+            onOpenEditModal={(goal) => {
+              dashboard.setSavingsGoalModalMode('EDIT')
+              dashboard.setTargetDepositGoal(goal)
+              dashboard.setShowSavingsGoalModal(true)
+            }}
+          />
+        </div>
 
         {/* Visual Charts Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -163,6 +198,24 @@ function DashboardPage() {
         onClose={() => dashboard.setShowBankImportModal(false)}
         categories={dashboard.categories}
         onImportTransactions={dashboard.handleImportBankTransactions}
+      />
+
+      <CategoryBudgetModal
+        isOpen={dashboard.showBudgetModal}
+        onClose={() => dashboard.setShowBudgetModal(false)}
+        categories={dashboard.categories}
+        onSaveBudgets={dashboard.handleSaveCategoryBudgets}
+      />
+
+      <SavingsGoalModal
+        isOpen={dashboard.showSavingsGoalModal}
+        onClose={() => dashboard.setShowSavingsGoalModal(false)}
+        mode={dashboard.savingsGoalModalMode}
+        targetGoal={dashboard.targetDepositGoal}
+        onCreateGoal={dashboard.handleCreateSavingsGoal}
+        onUpdateGoal={dashboard.handleUpdateSavingsGoal}
+        onDeleteGoal={dashboard.handleDeleteSavingsGoal}
+        onDepositGoal={dashboard.handleDepositSavingsGoal}
       />
     </div>
   )

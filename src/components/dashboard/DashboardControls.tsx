@@ -1,4 +1,4 @@
-import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet } from 'lucide-react'
+import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet, PieChart, Target } from 'lucide-react'
 import { Button } from '../ui/button'
 import { DateFilterPicker } from './DateFilterPicker'
 import type { DateFilterRange } from '../../lib/dateUtils'
@@ -12,6 +12,8 @@ interface DashboardControlsProps {
   onOpenWhatsAppModal: () => void
   onOpenReceiptModal: () => void
   onOpenBankImportModal: () => void
+  onOpenBudgetModal?: () => void
+  onOpenSavingsGoalModal?: () => void
 }
 
 export function DashboardControls({
@@ -23,6 +25,8 @@ export function DashboardControls({
   onOpenWhatsAppModal,
   onOpenReceiptModal,
   onOpenBankImportModal,
+  onOpenBudgetModal,
+  onOpenSavingsGoalModal,
 }: DashboardControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
@@ -34,6 +38,30 @@ export function DashboardControls({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        {onOpenBudgetModal && (
+          <Button
+            onClick={onOpenBudgetModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<PieChart className="w-3.5 h-3.5 text-indigo-400" />}
+            className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
+          >
+            Category Budgets
+          </Button>
+        )}
+
+        {onOpenSavingsGoalModal && (
+          <Button
+            onClick={onOpenSavingsGoalModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<Target className="w-3.5 h-3.5 text-emerald-400" />}
+            className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
+          >
+            Savings Goals
+          </Button>
+        )}
+
         <Button
           onClick={onOpenBankImportModal}
           variant="outline"

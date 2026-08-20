@@ -47,10 +47,31 @@ export const categories = pgTable(
     icon: text('icon').notNull().default('Tag'),
     color: text('color').notNull().default('#6366f1'),
     isDefault: boolean('is_default').default(false).notNull(),
+    monthlyBudget: numeric('monthly_budget', { precision: 14, scale: 2 }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index('idx_categories_user').on(table.userId),
+  ]
+)
+
+// Savings Goals table
+export const savingsGoals = pgTable(
+  'savings_goals',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').notNull(),
+    name: text('name').notNull(),
+    targetAmount: numeric('target_amount', { precision: 14, scale: 2 }).notNull(),
+    currentAmount: numeric('current_amount', { precision: 14, scale: 2 }).default('0').notNull(),
+    color: text('color').notNull().default('#10b981'),
+    icon: text('icon').notNull().default('Target'),
+    targetDate: timestamp('target_date', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_savings_goals_user').on(table.userId),
   ]
 )
 
