@@ -1,7 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { generateFallbackMockReceiptData, parseRawOcrText } from '../geminiOcr'
+import { generateFallbackMockReceiptData, parseRawOcrText, cleanIdrAmountString } from '../geminiOcr'
 
 describe('geminiOcr', () => {
+  it('cleanIdrAmountString correctly handles IDR rupiah formatted strings with comma cents', () => {
+    expect(cleanIdrAmountString('RP 280.000,00')).toBe(280000)
+    expect(cleanIdrAmountString('Rp 280.000,50')).toBe(280000)
+    expect(cleanIdrAmountString('1.500.000,00')).toBe(1500000)
+    expect(cleanIdrAmountString('50.000,-')).toBe(50000)
+  })
+
   it('generates structured fallback receipt mock data when API key is missing', async () => {
     const mockData = generateFallbackMockReceiptData()
     expect(mockData.amount).toBe(85000)
@@ -26,14 +33,14 @@ Pembayaran: QRIS BCA`
     expect(parsed.merchantName).toBe('Kopi Kenangan Sudirman')
   })
 
-  it('correctly parses bank transfer income OCR text', () => {
+  it('correctly parses bank transfer income OCR text with IDR comma cents format', () => {
     const rawOcr = `TRANSFER MASUK SUCCESSFUL
-Nominal: Rp 500.000
+Nominal: Rp 280.000,00
 Dari: Budi Santoso
 Bank: BCA`
 
     const parsed = parseRawOcrText(rawOcr)
-    expect(parsed.amount).toBe(500000)
+    expect(parsed.amount).toBe(280000)
     expect(parsed.type).toBe('INCOME')
     expect(parsed.paymentMethod).toBe('BANK_TRANSFER')
   })

@@ -13,6 +13,7 @@ import { AddTransactionModal } from '../components/dashboard/AddTransactionModal
 import { CategoryManagementModal } from '../components/dashboard/CategoryManagementModal'
 import { ExportModal } from '../components/dashboard/ExportModal'
 import { WhatsAppSettingsModal } from '../components/dashboard/WhatsAppSettingsModal'
+import { ReceiptUploadModal } from '../components/dashboard/ReceiptUploadModal'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -57,6 +58,7 @@ function DashboardPage() {
           onOpenExportModal={() => dashboard.setShowExportModal(true)}
           onOpenAddTxModal={() => dashboard.setShowAddTxModal(true)}
           onOpenWhatsAppModal={() => dashboard.setShowWhatsAppModal(true)}
+          onOpenReceiptModal={() => dashboard.setShowReceiptModal(true)}
         />
 
         {/* 3 Summary Stat Cards */}
@@ -83,6 +85,12 @@ function DashboardPage() {
       </main>
 
       {/* Modals */}
+      <ReceiptUploadModal
+        isOpen={dashboard.showReceiptModal}
+        onClose={() => dashboard.setShowReceiptModal(false)}
+        onReceiptExtracted={dashboard.handleReceiptExtracted}
+      />
+
       <AddTransactionModal
         isOpen={dashboard.showAddTxModal}
         onClose={() => dashboard.setShowAddTxModal(false)}

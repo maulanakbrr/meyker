@@ -16,9 +16,14 @@ export interface ExtractedReceiptData {
 const OCR_PROMPT = `You are an expert financial receipt and invoice OCR assistant. 
 Analyze the provided image of a receipt, invoice, QRIS payment confirmation, or bank transfer screenshot.
 
+CRITICAL CURRENCY RULES FOR INDONESIAN RUPIAH (IDR / Rp):
+- Indonesian currency (Rp / IDR) uses dots (.) as thousands separators and commas (,) for decimal cents.
+- Example: "Rp 280.000,00" or "RP 280.000,00" or "280.000,00" represents 280000 (280 thousand Rupiah), NOT 28000000 or 280.00.
+- Ignore the trailing decimal cents ",00" or ",50" when parsing IDR amounts so the resulting "amount" number is the exact integer value (e.g. 280000).
+
 Extract the following financial details and return ONLY a valid JSON object matching this exact schema:
 {
-  "amount": number (positive numeric value representing total transaction amount),
+  "amount": number (positive numeric value representing total transaction amount without cents, e.g. 280000 for Rp 280.000,00),
   "type": "EXPENSE" or "INCOME" ("INCOME" for received transfers/invoices, "EXPENSE" for purchases/payments),
   "categoryHint": string (one of: "Food & Dining", "Housing & Rent", "Transport & Fuel", "Utilities & Bills", "Shopping", "Entertainment", "Health & Medical", "Salary & Wages", "Freelance & Business", "Investments", "Miscellaneous"),
   "merchantName": string or null (e.g. store, restaurant, or counterparty name),
@@ -38,42 +43,53 @@ const MODELS_TO_TRY = [
 ]
 
 export async function processReceiptImageWithGemini(
-  imageBufferOrBase64: Buffer | string,
+  imageBufferOrBase64: any,
   mimeType: string = 'image/jpeg'
 ): Promise<ExtractedReceiptData> {
-  let imageBuffer: Buffer
+  let base64Data = ''
+
   if (typeof imageBufferOrBase64 === 'string') {
-    const cleanBase64 = imageBufferOrBase64.startsWith('data:')
+    base64Data = imageBufferOrBase64.startsWith('data:')
       ? imageBufferOrBase64.split(',')[1]
       : imageBufferOrBase64
-    imageBuffer = Buffer.from(cleanBase64, 'base64')
+  } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(imageBufferOrBase64)) {
+    base64Data = imageBufferOrBase64.toString('base64')
+  } else if (imageBufferOrBase64 instanceof Uint8Array || imageBufferOrBase64 instanceof ArrayBuffer) {
+    const bytes = new Uint8Array(imageBufferOrBase64 as ArrayBuffer)
+    let binary = ''
+    for (let i = 0; i < bytes.byteLength; i++) {
+      binary += String.fromCharCode(bytes[i])
+    }
+    base64Data = btoa(binary)
   } else {
-    imageBuffer = imageBufferOrBase64
+    throw new Error('Unsupported image data format for OCR processing.')
   }
 
   // 1. Try Gemini AI Vision Models
   try {
-    const geminiResult = await runGeminiOcr(imageBuffer, mimeType)
+    const geminiResult = await runGeminiOcr(base64Data, mimeType)
     return geminiResult
   } catch (geminiErr: any) {
     console.warn('[OCR Pipeline] Gemini AI failed or quota hit:', geminiErr?.message || geminiErr)
   }
 
-  // 2. Try Google Cloud Vision API (if configured)
-  try {
-    const visionResult = await runGoogleVisionOcr(imageBuffer)
-    if (visionResult) {
-      console.log('[OCR Pipeline] Successfully processed image using Google Cloud Vision API fallback.')
-      return visionResult
+  // 2. Try Google Cloud Vision API (if configured in Node environment)
+  if (typeof process !== 'undefined' && process.env?.GOOGLE_APPLICATION_CREDENTIALS) {
+    try {
+      const visionResult = await runGoogleVisionOcr(base64Data)
+      if (visionResult) {
+        console.log('[OCR Pipeline] Successfully processed image using Google Cloud Vision API fallback.')
+        return visionResult
+      }
+    } catch (visionErr: any) {
+      console.warn('[OCR Pipeline] Google Cloud Vision API failed:', visionErr?.message || visionErr)
     }
-  } catch (visionErr: any) {
-    console.warn('[OCR Pipeline] Google Cloud Vision API failed:', visionErr?.message || visionErr)
   }
 
   // 3. Fallback to Local Tesseract.js (Offline CPU OCR)
   try {
     console.log('[OCR Pipeline] Gemini & Vision exhausted/unavailable. Running local Tesseract.js OCR fallback...')
-    const tesseractResult = await runTesseractOcr(imageBuffer)
+    const tesseractResult = await runTesseractOcr(base64Data, mimeType)
     return tesseractResult
   } catch (tesseractErr: any) {
     console.error('[OCR Pipeline] Tesseract local OCR fallback failed:', tesseractErr?.message || tesseractErr)
@@ -82,17 +98,16 @@ export async function processReceiptImageWithGemini(
   throw new Error('Could not extract text or amount from receipt image across all OCR engines. Please send your transaction as text (e.g. "50k lunch").')
 }
 
-async function runGeminiOcr(imageBuffer: Buffer, mimeType: string): Promise<ExtractedReceiptData> {
+async function runGeminiOcr(base64Data: string, mimeType: string): Promise<ExtractedReceiptData> {
   const apiKey =
-    process.env.GEMINI_API_KEY ||
-    (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '')
+    (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : '') ||
+    (typeof process !== 'undefined' && process.env ? process.env.GEMINI_API_KEY : '')
 
   if (!apiKey) {
-    throw new Error('GEMINI_API_KEY is not configured on the server.')
+    throw new Error('GEMINI_API_KEY is not configured.')
   }
 
   const ai = new GoogleGenAI({ apiKey })
-  const base64Data = imageBuffer.toString('base64')
   let lastError: any = null
 
   for (const modelName of MODELS_TO_TRY) {
@@ -123,9 +138,20 @@ async function runGeminiOcr(imageBuffer: Buffer, mimeType: string): Promise<Extr
         .trim()
 
       const parsed = JSON.parse(cleanJsonText)
+      let parsedAmt = 0
+
+      if (typeof parsed.amount === 'string') {
+        parsedAmt = cleanIdrAmountString(parsed.amount)
+      } else if (typeof parsed.amount === 'number') {
+        parsedAmt = parsed.amount
+        // If Gemini misread trailing IDR cents e.g. 280.000,00 as 28000000 (28M)
+        if (parsedAmt >= 10000000 && String(parsedAmt).endsWith('00') && (cleanJsonText.includes(',00') || cleanJsonText.includes('.000,00'))) {
+          parsedAmt = Math.round(parsedAmt / 100)
+        }
+      }
 
       return {
-        amount: Number(parsed.amount) || 0,
+        amount: parsedAmt || 0,
         type: parsed.type === 'INCOME' ? 'INCOME' : 'EXPENSE',
         categoryHint: parsed.categoryHint || 'Miscellaneous',
         merchantName: parsed.merchantName || undefined,
@@ -145,11 +171,11 @@ async function runGeminiOcr(imageBuffer: Buffer, mimeType: string): Promise<Extr
   throw new Error(`All Gemini models failed: ${lastError?.message || 'Quota limit reached'}`)
 }
 
-async function runGoogleVisionOcr(imageBuffer: Buffer): Promise<ExtractedReceiptData | null> {
+async function runGoogleVisionOcr(base64Data: string): Promise<ExtractedReceiptData | null> {
   const hasVisionCreds =
-    process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-    process.env.GOOGLE_VISION_CREDENTIALS ||
-    process.env.GOOGLE_VISION_KEY
+    typeof process !== 'undefined' &&
+    process.env &&
+    (process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.GOOGLE_VISION_CREDENTIALS || process.env.GOOGLE_VISION_KEY)
 
   if (!hasVisionCreds) {
     return null
@@ -157,6 +183,7 @@ async function runGoogleVisionOcr(imageBuffer: Buffer): Promise<ExtractedReceipt
 
   const vision = await import('@google-cloud/vision')
   const client = new vision.ImageAnnotatorClient()
+  const imageBuffer = Buffer.from(base64Data, 'base64')
   const [result] = await client.documentTextDetection(imageBuffer)
   const fullText = result.fullTextAnnotation?.text || result.textAnnotations?.[0]?.description || ''
 
@@ -172,7 +199,7 @@ async function runGoogleVisionOcr(imageBuffer: Buffer): Promise<ExtractedReceipt
   }
 }
 
-async function runTesseractOcr(imageBuffer: Buffer): Promise<ExtractedReceiptData> {
+async function runTesseractOcr(base64Data: string, mimeType: string): Promise<ExtractedReceiptData> {
   try {
     const { createWorker } = await import('tesseract.js')
     const worker = await createWorker(['ind', 'eng'], 1, {
@@ -180,7 +207,8 @@ async function runTesseractOcr(imageBuffer: Buffer): Promise<ExtractedReceiptDat
     })
 
     try {
-      const { data } = await worker.recognize(imageBuffer)
+      const imageUrl = `data:${mimeType};base64,${base64Data}`
+      const { data } = await worker.recognize(imageUrl)
       const extractedText = data.text || ''
 
       if (!extractedText.trim()) {
@@ -203,6 +231,23 @@ async function runTesseractOcr(imageBuffer: Buffer): Promise<ExtractedReceiptDat
   }
 }
 
+export function cleanIdrAmountString(rawStr: string | number): number {
+  if (!rawStr) return 0
+  let str = String(rawStr).trim()
+
+  // 1. Strip trailing Indonesian cents (e.g. ",00", ",50", ",-")
+  str = str.replace(/,[0-9]{2}$/, '').replace(/,-$/, '')
+
+  // 2. Remove thousands separator dots
+  str = str.replace(/\./g, '')
+
+  // 3. Remove non-digit characters
+  str = str.replace(/[^\d]/g, '')
+
+  const num = parseInt(str, 10)
+  return isNaN(num) ? 0 : num
+}
+
 export function parseRawOcrText(rawText: string): Omit<ExtractedReceiptData, 'ocrEngine' | 'engineNotice'> {
   const lines = rawText
     .split('\n')
@@ -220,9 +265,8 @@ export function parseRawOcrText(rawText: string): Omit<ExtractedReceiptData, 'oc
     for (const pattern of amountPatterns) {
       const match = line.match(pattern)
       if (match && match[1]) {
-        const cleanedNumStr = match[1].replace(/\./g, '').replace(/,/g, '')
-        const num = parseInt(cleanedNumStr, 10)
-        if (!isNaN(num) && num > 100 && num < 1000000000) {
+        const num = cleanIdrAmountString(match[1])
+        if (num > 100 && num < 1000000000) {
           amount = num
           break
         }
@@ -235,11 +279,11 @@ export function parseRawOcrText(rawText: string): Omit<ExtractedReceiptData, 'oc
   if (amount === 0) {
     for (let i = lines.length - 1; i >= 0; i--) {
       const line = lines[i]
-      const numbers = line.match(/\b\d{1,3}(?:\.\d{3})+|\b\d{4,9}\b/g)
+      const numbers = line.match(/\b\d{1,3}(?:\.\d{3})+(?:,\d{2})?|\b\d{4,9}\b/g)
       if (numbers) {
         for (const numStr of numbers) {
-          const num = parseInt(numStr.replace(/\./g, ''), 10)
-          if (!isNaN(num) && num >= 1000 && num <= 100000000) {
+          const num = cleanIdrAmountString(numStr)
+          if (num >= 1000 && num <= 100000000) {
             amount = num
             break
           }

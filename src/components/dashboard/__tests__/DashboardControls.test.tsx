@@ -13,6 +13,7 @@ describe('DashboardControls', () => {
         onOpenExportModal={vi.fn()}
         onOpenAddTxModal={vi.fn()}
         onOpenWhatsAppModal={vi.fn()}
+        onOpenReceiptModal={vi.fn()}
       />
     )
 
@@ -27,8 +28,8 @@ describe('DashboardControls', () => {
     const handleOpenCat = vi.fn()
     const handleOpenExport = vi.fn()
     const handleOpenAddTx = vi.fn()
-
     const handleOpenWhatsApp = vi.fn()
+    const handleOpenReceipt = vi.fn()
 
     render(
       <DashboardControls
@@ -38,8 +39,12 @@ describe('DashboardControls', () => {
         onOpenExportModal={handleOpenExport}
         onOpenAddTxModal={handleOpenAddTx}
         onOpenWhatsAppModal={handleOpenWhatsApp}
+        onOpenReceiptModal={handleOpenReceipt}
       />
     )
+
+    fireEvent.click(screen.getByRole('button', { name: /scan receipt/i }))
+    expect(handleOpenReceipt).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByRole('button', { name: /whatsapp ai/i }))
     expect(handleOpenWhatsApp).toHaveBeenCalledTimes(1)

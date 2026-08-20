@@ -1,4 +1,4 @@
-import { Calendar, Tag, Download, Plus, MessageSquare } from 'lucide-react'
+import { Calendar, Tag, Download, Plus, MessageSquare, Scan } from 'lucide-react'
 import { Button } from '../ui/button'
 
 interface DashboardControlsProps {
@@ -8,6 +8,7 @@ interface DashboardControlsProps {
   onOpenExportModal: () => void
   onOpenAddTxModal: () => void
   onOpenWhatsAppModal: () => void
+  onOpenReceiptModal: () => void
 }
 
 export function DashboardControls({
@@ -17,6 +18,7 @@ export function DashboardControls({
   onOpenExportModal,
   onOpenAddTxModal,
   onOpenWhatsAppModal,
+  onOpenReceiptModal,
 }: DashboardControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
@@ -36,6 +38,16 @@ export function DashboardControls({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        <Button
+          onClick={onOpenReceiptModal}
+          variant="outline"
+          size="sm"
+          leftIcon={<Scan className="w-3.5 h-3.5 text-amber-400" />}
+          className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30"
+        >
+          Scan Receipt
+        </Button>
+
         <Button
           onClick={onOpenWhatsAppModal}
           variant="outline"
