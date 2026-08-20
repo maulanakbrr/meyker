@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Sparkles, Scan, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Sparkles, Scan, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { FileDropzone } from '../ui/file-dropzone'
 import { Button } from '../ui/button'
@@ -74,7 +74,7 @@ export function ReceiptUploadModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-md bg-gray-950 border border-gray-800 text-white rounded-2xl p-6 shadow-2xl space-y-4">
+      <DialogContent className="sm:max-w-xl w-full bg-gray-950 border border-gray-800 text-white rounded-2xl p-6 shadow-2xl space-y-4">
         <DialogHeader>
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
@@ -91,7 +91,7 @@ export function ReceiptUploadModal({
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 pt-1">
+        <div className="space-y-4 pt-1 flex flex-col">
           {/* File Dropzone */}
           <FileDropzone
             onFileSelect={handleFileSelect}
@@ -101,6 +101,13 @@ export function ReceiptUploadModal({
             label="Drag & drop receipt image or click to browse"
             hint="Supports PNG, JPG, WEBP up to 10MB"
           />
+
+          {isScanning && (
+            <div className="p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs flex items-center justify-center gap-2.5 animate-pulse">
+              <Loader2 className="w-4 h-4 animate-spin text-indigo-400 shrink-0" />
+              <span className="font-medium">Extracting receipt data with Gemini AI...</span>
+            </div>
+          )}
 
           {scanNotice && (
             <div className="p-3 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs flex items-center gap-2">
@@ -117,7 +124,7 @@ export function ReceiptUploadModal({
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-2">
+          <div className="flex items-center justify-end gap-3 pt-2 mt-auto">
             <Button
               type="button"
               variant="outline"
