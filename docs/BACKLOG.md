@@ -17,8 +17,8 @@ This document tracks future feature ideas, operational notes, and roadmap items.
 ---
 
 ## 📊 Phase 3: Imports, Reports & Advanced Sync
-- [ ] **Web App Receipt Image Upload**: Direct drag-and-drop image upload inside the web dashboard (extending OCR beyond WhatsApp).
-- [ ] **Enhanced Date & Year Filtering**: Expand dashboard filtering beyond monthly (`YYYY-MM`) to support exact date ranges, custom date pickers, and multi-year views.
+- [x] **Web App Receipt Image Upload**: Direct drag-and-drop image upload inside the web dashboard (extending OCR beyond WhatsApp).
+- [x] **Enhanced Date & Year Filtering**: Expand dashboard filtering beyond monthly (`YYYY-MM`) to support exact date ranges, custom date pickers, and multi-year views.
 - [x] **shadcn/ui Component Upgrade**: Upgrade native select dropdowns, inputs, tabs, popovers, date pickers, and dialogs across dashboard modals.
 - [x] **Bank Statement CSV/Excel Import**: Interactive UI with auto-preset detection (BCA, Mandiri, BRI, CIMB, Generic) and intelligent category keyword matching.
 - [x] **Monthly PDF Statement Generator**: Export formatted monthly statements and category breakdowns using jsPDF & jspdf-autotable.
