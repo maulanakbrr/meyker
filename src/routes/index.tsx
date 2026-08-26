@@ -20,6 +20,8 @@ import { CategoryBudgetCard } from '../components/dashboard/CategoryBudgetCard'
 import { SavingsGoalsCard } from '../components/dashboard/SavingsGoalsCard'
 import { CategoryBudgetModal } from '../components/dashboard/CategoryBudgetModal'
 import { SavingsGoalModal } from '../components/dashboard/SavingsGoalModal'
+import { RecurringTransactionCard } from '../components/dashboard/RecurringTransactionCard'
+import { RecurringTransactionModal } from '../components/dashboard/RecurringTransactionModal'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -71,13 +73,17 @@ function DashboardPage() {
             dashboard.setTargetDepositGoal(null)
             dashboard.setShowSavingsGoalModal(true)
           }}
+          onOpenRecurringModal={() => {
+            dashboard.setTargetEditRule(null)
+            dashboard.setShowRecurringModal(true)
+          }}
         />
 
         {/* 3 Summary Stat Cards */}
         <StatCards stats={dashboard.stats} />
 
-        {/* Category Budgets & Savings Goals Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Category Budgets, Savings Goals & Recurring Transactions Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <CategoryBudgetCard
             budgets={dashboard.categoryBudgetsData}
             onOpenBudgetModal={() => dashboard.setShowBudgetModal(true)}
@@ -99,6 +105,19 @@ function DashboardPage() {
               dashboard.setTargetDepositGoal(goal)
               dashboard.setShowSavingsGoalModal(true)
             }}
+          />
+          <RecurringTransactionCard
+            recurringRules={dashboard.recurringRules}
+            onOpenModal={() => {
+              dashboard.setTargetEditRule(null)
+              dashboard.setShowRecurringModal(true)
+            }}
+            onEditRule={(rule) => {
+              dashboard.setTargetEditRule(rule)
+              dashboard.setShowRecurringModal(true)
+            }}
+            onToggleActive={dashboard.handleToggleRecurringRule}
+            onDeleteRule={dashboard.handleDeleteRecurringRule}
           />
         </div>
 
@@ -216,6 +235,18 @@ function DashboardPage() {
         onUpdateGoal={dashboard.handleUpdateSavingsGoal}
         onDeleteGoal={dashboard.handleDeleteSavingsGoal}
         onDepositGoal={dashboard.handleDepositSavingsGoal}
+      />
+
+      <RecurringTransactionModal
+        isOpen={dashboard.showRecurringModal}
+        onClose={() => {
+          dashboard.setShowRecurringModal(false)
+          dashboard.setTargetEditRule(null)
+        }}
+        categories={dashboard.categories}
+        targetRule={dashboard.targetEditRule}
+        onSubmit={dashboard.handleCreateRecurringRule}
+        onUpdate={dashboard.handleUpdateRecurringRule}
       />
     </div>
   )

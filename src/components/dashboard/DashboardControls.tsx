@@ -1,4 +1,4 @@
-import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet, PieChart, Target } from 'lucide-react'
+import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet, PieChart, Target, Repeat } from 'lucide-react'
 import { Button } from '../ui/button'
 import { DateFilterPicker } from './DateFilterPicker'
 import type { DateFilterRange } from '../../lib/dateUtils'
@@ -14,6 +14,7 @@ interface DashboardControlsProps {
   onOpenBankImportModal: () => void
   onOpenBudgetModal?: () => void
   onOpenSavingsGoalModal?: () => void
+  onOpenRecurringModal?: () => void
 }
 
 export function DashboardControls({
@@ -27,6 +28,7 @@ export function DashboardControls({
   onOpenBankImportModal,
   onOpenBudgetModal,
   onOpenSavingsGoalModal,
+  onOpenRecurringModal,
 }: DashboardControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
@@ -38,6 +40,18 @@ export function DashboardControls({
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
+        {onOpenRecurringModal && (
+          <Button
+            onClick={onOpenRecurringModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<Repeat className="w-3.5 h-3.5 text-purple-400" />}
+            className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border-purple-500/30"
+          >
+            Recurring Rules
+          </Button>
+        )}
+
         {onOpenBudgetModal && (
           <Button
             onClick={onOpenBudgetModal}

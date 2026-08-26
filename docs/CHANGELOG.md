@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-08-20
 
 ### 🎉 Added (Phase 3: Imports, Reports, Budgets & Savings Goals)
+- **Recurring Transactions & Subscriptions**:
+  - Setup automated recurring income and expense rules with custom frequencies (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`) (`RecurringTransactionModal.tsx`).
+  - Active subscription card overview with status toggling (activate/pause), edit action, and deletion (`RecurringTransactionCard.tsx`).
+  - Automated due-date engine that auto-logs entries into transaction history on due dates and advances rule next due date (`recurringUtils.ts`, `useDashboard.ts`).
+  - Reusable `DatePicker` component built with Radix `Popover` & `Calendar` for accessible single-date selection (`date-picker.tsx`).
+  - Official Radix `Dialog` modal integration supporting ESC key and backdrop click-to-close (`dialog.tsx`).
+  - Form control upgrades to `shadcn/ui` `Tabs`, `Select`, `Input`, and `Button` components across dashboard modals.
 - **Category Spending Budgets**:
   - Monthly target spending caps configuration per expense category (`CategoryBudgetModal.tsx`).
   - Dynamic visual progress bars on the web dashboard with color-coded health indicators: Emerald (<75%), Amber (75%–99%), and Rose alert badges (≥100%) (`CategoryBudgetCard.tsx`, `calculateCategoryBudgets`).

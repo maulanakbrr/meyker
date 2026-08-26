@@ -10,7 +10,7 @@ interface CategoryBudgetCardProps {
 
 export function CategoryBudgetCard({ budgets = [], onOpenBudgetModal }: CategoryBudgetCardProps) {
   return (
-    <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-between">
+    <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-start">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
