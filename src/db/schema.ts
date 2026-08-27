@@ -28,6 +28,7 @@ export const profiles = pgTable(
     fullName: text('full_name'),
     avatarUrl: text('avatar_url'),
     phoneNumber: text('phone_number').unique(),
+    googleSheetsId: text('google_sheets_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },

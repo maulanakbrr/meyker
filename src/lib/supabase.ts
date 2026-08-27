@@ -16,6 +16,11 @@ export async function signInWithGoogle() {
     options: {
       redirectTo: `${window.location.origin}`,
       skipBrowserRedirect: true,
+      scopes: 'https://www.googleapis.com/auth/spreadsheets',
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
     },
   })
   if (error) throw error

@@ -1,4 +1,4 @@
-import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet, PieChart, Target } from 'lucide-react'
+import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet, PieChart, Target, RefreshCw } from 'lucide-react'
 import { Button } from '../ui/button'
 import { DateFilterPicker } from './DateFilterPicker'
 import type { DateFilterRange } from '../../lib/dateUtils'
@@ -14,6 +14,7 @@ interface DashboardControlsProps {
   onOpenBankImportModal: () => void
   onOpenBudgetModal?: () => void
   onOpenSavingsGoalModal?: () => void
+  onOpenGoogleSheetsModal?: () => void
 }
 
 export function DashboardControls({
@@ -27,6 +28,7 @@ export function DashboardControls({
   onOpenBankImportModal,
   onOpenBudgetModal,
   onOpenSavingsGoalModal,
+  onOpenGoogleSheetsModal,
 }: DashboardControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
@@ -71,6 +73,18 @@ export function DashboardControls({
         >
           Import CSV / Excel
         </Button>
+
+        {onOpenGoogleSheetsModal && (
+          <Button
+            onClick={onOpenGoogleSheetsModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<RefreshCw className="w-3.5 h-3.5 text-emerald-400" />}
+            className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+          >
+            Google Sheets Sync
+          </Button>
+        )}
 
         <Button
           onClick={onOpenReceiptModal}

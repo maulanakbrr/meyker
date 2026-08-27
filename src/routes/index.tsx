@@ -20,6 +20,8 @@ import { CategoryBudgetCard } from '../components/dashboard/CategoryBudgetCard'
 import { SavingsGoalsCard } from '../components/dashboard/SavingsGoalsCard'
 import { CategoryBudgetModal } from '../components/dashboard/CategoryBudgetModal'
 import { SavingsGoalModal } from '../components/dashboard/SavingsGoalModal'
+import { GoogleSheetsSyncModal } from '../components/dashboard/GoogleSheetsSyncModal'
+import { supabase } from '../lib/supabase'
 
 export const Route = createFileRoute('/')({
   component: DashboardPage,
@@ -71,6 +73,7 @@ function DashboardPage() {
             dashboard.setTargetDepositGoal(null)
             dashboard.setShowSavingsGoalModal(true)
           }}
+          onOpenGoogleSheetsModal={() => dashboard.setShowGoogleSheetsModal(true)}
         />
 
         {/* 3 Summary Stat Cards */}
@@ -216,6 +219,16 @@ function DashboardPage() {
         onUpdateGoal={dashboard.handleUpdateSavingsGoal}
         onDeleteGoal={dashboard.handleDeleteSavingsGoal}
         onDepositGoal={dashboard.handleDepositSavingsGoal}
+      />
+      <GoogleSheetsSyncModal
+        isOpen={dashboard.showGoogleSheetsModal}
+        onClose={() => dashboard.setShowGoogleSheetsModal(false)}
+        googleSheetsId={dashboard.googleSheetsId}
+        transactions={dashboard.transactions}
+        onSaveSheetId={async (newId) => {
+          dashboard.setGoogleSheetsId(newId)
+          await supabase.from('profiles').update({ google_sheets_id: newId }).eq('id', dashboard.user.id)
+        }}
       />
     </div>
   )
