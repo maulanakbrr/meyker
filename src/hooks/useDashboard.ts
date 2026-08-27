@@ -57,6 +57,8 @@ export function useDashboard() {
   const [savingsGoalModalMode, setSavingsGoalModalMode] = useState<'CREATE' | 'EDIT' | 'DEPOSIT'>('CREATE')
   const [targetDepositGoal, setTargetDepositGoal] = useState<SavingsGoal | null>(null)
   const [targetEditRule, setTargetEditRule] = useState<RecurringTransaction | null>(null)
+  const [showGoogleSheetsModal, setShowGoogleSheetsModal] = useState(false)
+  const [googleSheetsId, setGoogleSheetsId] = useState<string | null>(null)
 
   // Form State - New Transaction
   const [txAmount, setTxAmount] = useState('')
@@ -232,12 +234,13 @@ export function useDashboard() {
       // Fetch Profile Phone Number
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('phone_number')
+        .select('phone_number, google_sheets_id')
         .eq('id', userId)
         .maybeSingle()
 
       if (profileData) {
         setUserPhoneNumber(profileData.phone_number)
+        setGoogleSheetsId(profileData.google_sheets_id || null)
       }
 
       // Fetch Categories
@@ -1013,6 +1016,10 @@ export function useDashboard() {
     setTargetDepositGoal,
     targetEditRule,
     setTargetEditRule,
+    showGoogleSheetsModal,
+    setShowGoogleSheetsModal,
+    googleSheetsId,
+    setGoogleSheetsId,
     handleReceiptExtracted,
     handleImportBankTransactions,
     userPhoneNumber,
