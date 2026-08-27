@@ -1,7 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { supabase, signOut } from '../lib/supabase'
-import type { Transaction, Category, TransactionType, PaymentMethod, SavingsGoal } from '../types'
+import type {
+  Transaction,
+  Category,
+  TransactionType,
+  PaymentMethod,
+  SavingsGoal,
+  RecurringTransaction,
+  RecurringFrequency,
+} from '../types'
 import {
   calculateDashboardStats,
   calculateCategoryBreakdown,
@@ -9,6 +17,7 @@ import {
   calculateCategoryBudgets,
   filterDashboardTransactions,
 } from '../lib/dashboardUtils'
+import { calculateNextDueDate, getDueRecurringRules } from '../lib/recurringUtils'
 
 import { getDateRangeForPreset, type DateFilterRange } from '../lib/dateUtils'
 
@@ -21,6 +30,7 @@ export function useDashboard() {
   const [categories, setCategories] = useState<Category[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [savingsGoals, setSavingsGoals] = useState<SavingsGoal[]>([])
+  const [recurringRules, setRecurringRules] = useState<RecurringTransaction[]>([])
 
   // Filter State
   const [selectedMonth, setSelectedMonth] = useState<string>(
@@ -43,8 +53,10 @@ export function useDashboard() {
   const [showBankImportModal, setShowBankImportModal] = useState(false)
   const [showBudgetModal, setShowBudgetModal] = useState(false)
   const [showSavingsGoalModal, setShowSavingsGoalModal] = useState(false)
+  const [showRecurringModal, setShowRecurringModal] = useState(false)
   const [savingsGoalModalMode, setSavingsGoalModalMode] = useState<'CREATE' | 'EDIT' | 'DEPOSIT'>('CREATE')
   const [targetDepositGoal, setTargetDepositGoal] = useState<SavingsGoal | null>(null)
+  const [targetEditRule, setTargetEditRule] = useState<RecurringTransaction | null>(null)
   const [showGoogleSheetsModal, setShowGoogleSheetsModal] = useState(false)
   const [googleSheetsId, setGoogleSheetsId] = useState<string | null>(null)
 
@@ -111,6 +123,10 @@ export function useDashboard() {
         if (localGoals) {
           setSavingsGoals(JSON.parse(localGoals))
         }
+        const localRules = localStorage.getItem('meyker_recurring_rules')
+        if (localRules) {
+          setRecurringRules(JSON.parse(localRules))
+        }
         const localBudgets = localStorage.getItem('meyker_category_budgets')
         if (localBudgets) {
           const map: Record<string, number> = JSON.parse(localBudgets)
@@ -123,14 +139,14 @@ export function useDashboard() {
       }
     }
 
+    loadLocalFallback()
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoadingAuth(false)
 
       if (session?.user) {
         fetchUserData(session.user.id)
-      } else {
-        loadLocalFallback()
       }
     })
 
@@ -139,8 +155,6 @@ export function useDashboard() {
       setLoadingAuth(false)
       if (session?.user) {
         fetchUserData(session.user.id)
-      } else {
-        loadLocalFallback()
       }
     })
 
@@ -161,6 +175,59 @@ export function useDashboard() {
       window.removeEventListener('message', handleMessage)
     }
   }, [])
+
+  // Auto-process due recurring rules
+  useEffect(() => {
+    if (recurringRules.length === 0) return
+
+    const dueRules = getDueRecurringRules(recurringRules)
+    if (dueRules.length === 0) return
+
+    dueRules.forEach(async (rule) => {
+      const matchedCat = categories.find((c) => c.id === rule.categoryId) || null
+      const newTx: Transaction = {
+        id: `tx-rec-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        userId: rule.userId,
+        categoryId: rule.categoryId,
+        amount: rule.amount,
+        type: rule.type,
+        transactionDate: rule.nextDueDate,
+        paymentMethod: rule.paymentMethod,
+        note: `Auto-recurring: ${rule.title}`,
+        source: 'RECURRING',
+        category: matchedCat,
+      }
+
+      const nextDue = calculateNextDueDate(rule.nextDueDate, rule.frequency)
+
+      setTransactions((prev) => [newTx, ...prev])
+      setRecurringRules((prev) =>
+        prev.map((r) => (r.id === rule.id ? { ...r, nextDueDate: nextDue } : r))
+      )
+
+      if (user?.id) {
+        try {
+          await supabase.from('transactions').insert({
+            user_id: user.id,
+            category_id: rule.categoryId,
+            amount: rule.amount,
+            type: rule.type,
+            transaction_date: rule.nextDueDate,
+            payment_method: rule.paymentMethod,
+            note: `Auto-recurring: ${rule.title}`,
+            source: 'RECURRING',
+          })
+
+          await supabase
+            .from('recurring_transactions')
+            .update({ next_due_date: nextDue })
+            .eq('id', rule.id)
+        } catch (err) {
+          console.error('[Dashboard Error] Auto-logging recurring rule failed:', err)
+        }
+      }
+    })
+  }, [recurringRules.length])
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -202,25 +269,62 @@ export function useDashboard() {
       }
 
       // Fetch Savings Goals
-      const { data: goalData } = await supabase
+      const { data: goalData, error: goalErr } = await supabase
         .from('savings_goals')
         .select('*')
         .eq('user_id', userId)
 
+      if (goalErr) {
+        console.warn('[Dashboard DB Warning] Failed to fetch savings_goals:', goalErr.message || goalErr)
+      }
+
       if (goalData && goalData.length > 0) {
-        setSavingsGoals(
-          goalData.map((g: any) => ({
-            id: g.id,
-            userId: g.user_id,
-            name: g.name,
-            targetAmount: Number(g.target_amount),
-            currentAmount: Number(g.current_amount),
-            color: g.color,
-            icon: g.icon,
-            targetDate: g.target_date,
-            createdAt: g.created_at,
-          }))
-        )
+        const formattedGoals = goalData.map((g: any) => ({
+          id: g.id,
+          userId: g.user_id,
+          name: g.name,
+          targetAmount: Number(g.target_amount),
+          currentAmount: Number(g.current_amount),
+          color: g.color,
+          icon: g.icon,
+          targetDate: g.target_date,
+          createdAt: g.created_at,
+        }))
+        setSavingsGoals(formattedGoals)
+        try {
+          localStorage.setItem('meyker_savings_goals', JSON.stringify(formattedGoals))
+        } catch (e) {}
+      }
+
+      // Fetch Recurring Transactions
+      const { data: recurringData, error: recErr } = await supabase
+        .from('recurring_transactions')
+        .select('*')
+        .eq('user_id', userId)
+
+      if (recErr) {
+        console.warn('[Dashboard DB Warning] Failed to fetch recurring_transactions:', recErr.message || recErr)
+      }
+
+      if (recurringData && recurringData.length > 0) {
+        const formattedRules: RecurringTransaction[] = recurringData.map((r: any) => ({
+          id: r.id,
+          userId: r.user_id,
+          title: r.title,
+          amount: Number(r.amount),
+          type: r.type,
+          categoryId: r.category_id,
+          paymentMethod: r.payment_method,
+          frequency: r.frequency,
+          startDate: r.start_date,
+          nextDueDate: r.next_due_date,
+          isActive: r.is_active,
+          createdAt: r.created_at,
+        }))
+        setRecurringRules(formattedRules)
+        try {
+          localStorage.setItem('meyker_recurring_rules', JSON.stringify(formattedRules))
+        } catch (e) {}
       }
 
       // Fetch Transactions
@@ -709,6 +813,155 @@ export function useDashboard() {
     }
   }
 
+  const handleCreateRecurringRule = async (rule: {
+    title: string
+    amount: number
+    type: TransactionType
+    categoryId: string
+    paymentMethod: PaymentMethod
+    frequency: RecurringFrequency
+    startDate: string
+  }) => {
+    const newRule: RecurringTransaction = {
+      id: `rule-${Date.now()}`,
+      userId: user?.id || 'demo-user',
+      title: rule.title,
+      amount: rule.amount,
+      type: rule.type,
+      categoryId: rule.categoryId || null,
+      paymentMethod: rule.paymentMethod,
+      frequency: rule.frequency,
+      startDate: rule.startDate,
+      nextDueDate: rule.startDate,
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    }
+
+    setRecurringRules((prev) => {
+      const next = [newRule, ...prev]
+      try {
+        localStorage.setItem('meyker_recurring_rules', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user) {
+      const { data, error } = await supabase
+        .from('recurring_transactions')
+        .insert({
+          user_id: user.id,
+          title: rule.title,
+          amount: rule.amount,
+          type: rule.type,
+          category_id: rule.categoryId || null,
+          payment_method: rule.paymentMethod,
+          frequency: rule.frequency,
+          start_date: rule.startDate,
+          next_due_date: rule.startDate,
+          is_active: true,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to create recurring rule:', error.message || error)
+      } else if (data) {
+        setRecurringRules((prev) => {
+          const next = prev.map((r) => (r.id === newRule.id ? { ...r, id: data.id } : r))
+          try {
+            localStorage.setItem('meyker_recurring_rules', JSON.stringify(next))
+          } catch (e) {}
+          return next
+        })
+      }
+    }
+  }
+
+  const handleToggleRecurringRule = async (ruleId: string, currentActive: boolean) => {
+    const nextActive = !currentActive
+    setRecurringRules((prev) => {
+      const next = prev.map((r) => (r.id === ruleId ? { ...r, isActive: nextActive } : r))
+      try {
+        localStorage.setItem('meyker_recurring_rules', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user) {
+      const { error } = await supabase
+        .from('recurring_transactions')
+        .update({ is_active: nextActive })
+        .eq('id', ruleId)
+
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to toggle recurring rule:', error.message || error)
+      }
+    }
+  }
+
+  const handleUpdateRecurringRule = async (
+    ruleId: string,
+    fields: {
+      amount: number
+      frequency: RecurringFrequency
+      paymentMethod: PaymentMethod
+      startDate: string
+    }
+  ) => {
+    setRecurringRules((prev) => {
+      const next = prev.map((r) =>
+        r.id === ruleId
+          ? {
+              ...r,
+              amount: fields.amount,
+              frequency: fields.frequency,
+              paymentMethod: fields.paymentMethod,
+              startDate: fields.startDate,
+              nextDueDate: fields.startDate,
+            }
+          : r
+      )
+      try {
+        localStorage.setItem('meyker_recurring_rules', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user) {
+      const { error } = await supabase
+        .from('recurring_transactions')
+        .update({
+          amount: fields.amount,
+          frequency: fields.frequency,
+          payment_method: fields.paymentMethod,
+          start_date: fields.startDate,
+          next_due_date: fields.startDate,
+        })
+        .eq('id', ruleId)
+
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to update recurring rule:', error.message || error)
+      }
+    }
+  }
+
+  const handleDeleteRecurringRule = async (ruleId: string) => {
+    setRecurringRules((prev) => {
+      const next = prev.filter((r) => r.id !== ruleId)
+      try {
+        localStorage.setItem('meyker_recurring_rules', JSON.stringify(next))
+      } catch (e) {}
+      return next
+    })
+
+    if (user) {
+      const { error } = await supabase.from('recurring_transactions').delete().eq('id', ruleId)
+      if (error) {
+        console.error('[Dashboard DB Error] Failed to delete recurring rule:', error.message || error)
+      }
+    }
+  }
+
   return {
     navigate,
     user,
@@ -724,6 +977,7 @@ export function useDashboard() {
     monthlyTrendData,
     categoryBudgetsData,
     savingsGoals,
+    recurringRules,
 
     // Filter State
     selectedMonth,
@@ -754,10 +1008,14 @@ export function useDashboard() {
     setShowBudgetModal,
     showSavingsGoalModal,
     setShowSavingsGoalModal,
+    showRecurringModal,
+    setShowRecurringModal,
     savingsGoalModalMode,
     setSavingsGoalModalMode,
     targetDepositGoal,
     setTargetDepositGoal,
+    targetEditRule,
+    setTargetEditRule,
     showGoogleSheetsModal,
     setShowGoogleSheetsModal,
     googleSheetsId,
@@ -798,5 +1056,9 @@ export function useDashboard() {
     handleDepositSavingsGoal,
     handleUpdateSavingsGoal,
     handleDeleteSavingsGoal,
+    handleCreateRecurringRule,
+    handleUpdateRecurringRule,
+    handleToggleRecurringRule,
+    handleDeleteRecurringRule,
   }
 }

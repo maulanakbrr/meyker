@@ -11,12 +11,18 @@ import {
 
 // Enums
 export const transactionTypeEnum = pgEnum('transaction_type', ['INCOME', 'EXPENSE'])
-export const transactionSourceEnum = pgEnum('transaction_source', ['WEB', 'WHATSAPP', 'IMPORT'])
+export const transactionSourceEnum = pgEnum('transaction_source', ['WEB', 'WHATSAPP', 'IMPORT', 'RECURRING'])
 export const paymentMethodEnum = pgEnum('payment_method', [
   'CASH',
   'BANK_TRANSFER',
   'CREDIT_CARD',
   'E_WALLET',
+])
+export const recurringFrequencyEnum = pgEnum('recurring_frequency', [
+  'DAILY',
+  'WEEKLY',
+  'MONTHLY',
+  'YEARLY',
 ])
 
 // Profiles table (linked to auth.users)
@@ -73,6 +79,30 @@ export const savingsGoals = pgTable(
   },
   (table) => [
     index('idx_savings_goals_user').on(table.userId),
+  ]
+)
+
+// Recurring Transactions table
+export const recurringTransactions = pgTable(
+  'recurring_transactions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').notNull(),
+    title: text('title').notNull(),
+    amount: numeric('amount', { precision: 14, scale: 2 }).notNull(),
+    type: transactionTypeEnum('type').notNull(),
+    categoryId: uuid('category_id').references(() => categories.id, { onDelete: 'set null' }),
+    paymentMethod: paymentMethodEnum('payment_method').default('CASH').notNull(),
+    frequency: recurringFrequencyEnum('frequency').default('MONTHLY').notNull(),
+    startDate: timestamp('start_date', { withTimezone: true }).notNull(),
+    nextDueDate: timestamp('next_due_date', { withTimezone: true }).notNull(),
+    isActive: boolean('is_active').default(true).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('idx_recurring_user').on(table.userId),
+    index('idx_recurring_due').on(table.nextDueDate),
   ]
 )
 

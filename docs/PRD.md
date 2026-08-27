@@ -56,6 +56,8 @@
   - Two-way live synchronization using Google Sheets API (OAuth2).
 - **Savings Goals & Category Budgets (Completed)**:
   - Monthly spending caps per category with visual health bars and personal savings goals tracker with quick deposit contribution support.
+- **Recurring Transactions & Subscriptions (Completed)**:
+  - Automated recurring income and expense rules with custom frequencies (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), active subscription management, rule editing, Radix Dialog modals, and reusable single-date picker.
 
 ---
 
