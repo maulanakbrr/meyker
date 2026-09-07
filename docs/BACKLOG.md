@@ -28,7 +28,15 @@ This document tracks future feature ideas, operational notes, and roadmap items.
 
 ---
 
+## 🎨 Phase 4: Advanced UX, Insights & Optimization
+- [ ] **Dashboard Toolbar UX Refactoring & Action Consolidation**: Consolidate 10 scattered multi-color action buttons into unified Radix Popover menus (`Data & Sync` and `More`), sleek dark aesthetic, and clean hierarchy.
+- [ ] **AI Spending Advisor & Cashflow Forecast**: Google Gemini-powered financial review and budget suggestions.
+- [ ] **Google Sheets Two-Way Sync**: Bi-directional sync pulling remote sheet rows back into Supabase.
+- [ ] **Transaction Tags & Granular Labels**: `#tag` support in manual entry, WhatsApp parser, and dashboard filters.
+- [ ] **Multi-Currency Support**: Per-transaction currency selector with automatic exchange rate conversion.
+
+---
+
 ## 💡 Future Backlog Ideas (Unscheduled)
-- [ ] Multi-currency support with automatic exchange rate conversion.
 - [ ] Shared household / joint budget accounts with multi-user permissions.
-- [ ] Custom tags & hash labels per transaction for granular search.
+- [ ] Demo mode / Mock data toggle for portfolio preview.
