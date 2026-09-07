@@ -207,7 +207,7 @@ export async function exportToPdf(
     },
     didParseCell: (data) => {
       if (data.section === 'body') {
-        const typeVal = data.row.raw[1]
+        const typeVal = (data.row.raw as any)?.[1]
         if (typeVal === 'INCOME') {
           if (data.column.index === 1 || data.column.index === 5) {
             data.cell.styles.textColor = [22, 163, 74]

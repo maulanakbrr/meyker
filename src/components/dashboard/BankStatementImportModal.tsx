@@ -449,11 +449,14 @@ export function BankStatementImportModal({
                               <SelectValue placeholder="Category" />
                             </SelectTrigger>
                             <SelectContent className="bg-gray-900 border-gray-800 text-white">
-                              {categories.map((c) => (
-                                <SelectItem key={c.id} value={c.id} className="text-xs">
-                                  {c.name}
-                                </SelectItem>
-                              ))}
+                              {categories.map((c) => {
+                                const catValue = c.id || c.name
+                                return (
+                                  <SelectItem key={catValue} value={catValue} className="text-xs">
+                                    {c.name}
+                                  </SelectItem>
+                                )
+                              })}
                             </SelectContent>
                           </Select>
                         </td>

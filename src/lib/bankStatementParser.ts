@@ -221,7 +221,7 @@ export async function parseFileRows(file: File): Promise<{ headers: string[]; ro
           const rows = (results.data as Record<string, any>[]).filter((r) => Object.values(r).some((v) => v !== ''))
           resolve({ headers, rows })
         },
-        error: (err) => reject(err),
+        error: (err: Error) => reject(err),
       })
     })
   }

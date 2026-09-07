@@ -158,7 +158,6 @@ export function DateFilterPicker({ dateRange, onDateRangeChange }: DateFilterPic
             </div>
 
             <Calendar
-              initialFocus
               mode="range"
               defaultMonth={selectedRange?.from}
               selected={selectedRange}
