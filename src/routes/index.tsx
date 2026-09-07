@@ -260,7 +260,6 @@ function DashboardPage() {
         targetRule={dashboard.targetEditRule}
         onSubmit={dashboard.handleCreateRecurringRule}
         onUpdate={dashboard.handleUpdateRecurringRule}
->>>>>>> origin/feat/phase3-imports-reports-sync
       />
     </div>
   )
