@@ -1,4 +1,5 @@
 import type { Transaction, Category } from '../types'
+import { isDateInRange, type DateFilterRange } from './dateUtils'
 
 /**
  * Safely format YYYY-MM month key from any transaction date string
@@ -21,17 +22,23 @@ export interface DashboardStats {
 }
 
 /**
- * Calculate total income, total expenses, and total balance for the selected month
+ * Calculate total income, total expenses, and total balance for the selected date range or month
  */
 export function calculateDashboardStats(
   transactions: Transaction[],
-  selectedMonth: string
+  selectedMonthOrRange: string | DateFilterRange
 ): DashboardStats {
-  const monthTxs = transactions.filter((tx) => getTxMonthKey(tx.transactionDate) === selectedMonth)
-  const totalIncome = monthTxs
+  const filtered = transactions.filter((tx) => {
+    if (typeof selectedMonthOrRange === 'string') {
+      return getTxMonthKey(tx.transactionDate) === selectedMonthOrRange
+    }
+    return isDateInRange(tx.transactionDate, selectedMonthOrRange)
+  })
+
+  const totalIncome = filtered
     .filter((t) => t.type === 'INCOME')
     .reduce((acc, curr) => acc + Number(curr.amount), 0)
-  const totalExpenses = monthTxs
+  const totalExpenses = filtered
     .filter((t) => t.type === 'EXPENSE')
     .reduce((acc, curr) => acc + Number(curr.amount), 0)
 
@@ -53,12 +60,16 @@ export interface CategoryBreakdownItem {
  */
 export function calculateCategoryBreakdown(
   transactions: Transaction[],
-  selectedMonth: string,
+  selectedMonthOrRange: string | DateFilterRange,
   categories: Category[]
 ): CategoryBreakdownItem[] {
-  const expenseTxs = transactions.filter(
-    (tx) => getTxMonthKey(tx.transactionDate) === selectedMonth && tx.type === 'EXPENSE'
-  )
+  const expenseTxs = transactions.filter((tx) => {
+    if (tx.type !== 'EXPENSE') return false
+    if (typeof selectedMonthOrRange === 'string') {
+      return getTxMonthKey(tx.transactionDate) === selectedMonthOrRange
+    }
+    return isDateInRange(tx.transactionDate, selectedMonthOrRange)
+  })
   const map: Record<string, CategoryBreakdownItem> = {}
 
   expenseTxs.forEach((tx) => {
@@ -113,22 +124,28 @@ export function calculateMonthlyTrend(transactions: Transaction[]): MonthlyTrend
 
 export interface TransactionFilterOptions {
   selectedMonth?: string
+  dateRange?: DateFilterRange
   typeFilter?: 'ALL' | 'INCOME' | 'EXPENSE' | string
   categoryFilter?: string
   searchQuery?: string
 }
 
 /**
- * Filter transactions based on month, type, category, and search query
+ * Filter transactions based on date range / month, type, category, and search query
  */
 export function filterDashboardTransactions(
   transactions: Transaction[],
   filters: TransactionFilterOptions
 ): Transaction[] {
-  const { selectedMonth, typeFilter = 'ALL', categoryFilter = 'ALL', searchQuery = '' } = filters
+  const { selectedMonth, dateRange, typeFilter = 'ALL', categoryFilter = 'ALL', searchQuery = '' } = filters
 
   return transactions.filter((tx) => {
-    if (selectedMonth && getTxMonthKey(tx.transactionDate) !== selectedMonth) return false
+    if (dateRange) {
+      if (!isDateInRange(tx.transactionDate, dateRange)) return false
+    } else if (selectedMonth && getTxMonthKey(tx.transactionDate) !== selectedMonth) {
+      return false
+    }
+
     if (typeFilter !== 'ALL' && tx.type !== typeFilter) return false
     if (categoryFilter !== 'ALL' && tx.categoryId !== categoryFilter) return false
 
@@ -141,4 +158,96 @@ export function filterDashboardTransactions(
 
     return true
   })
+}
+
+export interface CategoryBudgetProgress {
+  categoryId: string
+  categoryName: string
+  color: string
+  icon: string
+  spent: number
+  limit: number
+  percentage: number
+  status: 'HEALTHY' | 'CAUTION' | 'EXCEEDED'
+  exceededAmount: number
+}
+
+/**
+ * Calculate spending progress for categories that have a monthlyBudget set
+ */
+export function calculateCategoryBudgets(
+  transactions: Transaction[],
+  selectedMonthOrRange: string | DateFilterRange,
+  categories: Category[]
+): CategoryBudgetProgress[] {
+  const expenseTxs = transactions.filter((tx) => {
+    if (tx.type !== 'EXPENSE') return false
+    if (typeof selectedMonthOrRange === 'string') {
+      return getTxMonthKey(tx.transactionDate) === selectedMonthOrRange
+    }
+    return isDateInRange(tx.transactionDate, selectedMonthOrRange)
+  })
+
+  const spentMap: Record<string, number> = {}
+  expenseTxs.forEach((tx) => {
+    if (tx.categoryId) {
+      spentMap[tx.categoryId] = (spentMap[tx.categoryId] || 0) + Number(tx.amount)
+    }
+  })
+
+  const budgetedCategories = categories.filter(
+    (c) => c.type === 'EXPENSE' && c.monthlyBudget !== undefined && c.monthlyBudget !== null && Number(c.monthlyBudget) > 0
+  )
+
+  return budgetedCategories.map((cat) => {
+    const limit = Number(cat.monthlyBudget)
+    const spent = spentMap[cat.id] || 0
+    const percentage = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 999) : 0
+    const exceededAmount = Math.max(0, spent - limit)
+
+    let status: 'HEALTHY' | 'CAUTION' | 'EXCEEDED' = 'HEALTHY'
+    if (spent >= limit) {
+      status = 'EXCEEDED'
+    } else if (percentage >= 75) {
+      status = 'CAUTION'
+    }
+
+    return {
+      categoryId: cat.id,
+      categoryName: cat.name,
+      color: cat.color,
+      icon: cat.icon,
+      spent,
+      limit,
+      percentage,
+      status,
+      exceededAmount,
+    }
+  })
+}
+
+export interface SavingsGoalProgress {
+  percentage: number
+  remainingAmount: number
+  isCompleted: boolean
+}
+
+/**
+ * Calculate progress percentage and remaining amount for a savings goal
+ */
+export function calculateSavingsGoalProgress(
+  targetAmount: number,
+  currentAmount: number
+): SavingsGoalProgress {
+  const target = Number(targetAmount) || 0
+  const current = Number(currentAmount) || 0
+  const percentage = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0
+  const remainingAmount = Math.max(0, target - current)
+  const isCompleted = current >= target
+
+  return {
+    percentage,
+    remainingAmount,
+    isCompleted,
+  }
 }

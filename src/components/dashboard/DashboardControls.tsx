@@ -1,67 +1,155 @@
-import { Calendar, Tag, Download, Plus, MessageSquare } from 'lucide-react'
+import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet, PieChart, Target, Repeat, RefreshCw } from 'lucide-react'
+import { Button } from '../ui/button'
+import { DateFilterPicker } from './DateFilterPicker'
+import type { DateFilterRange } from '../../lib/dateUtils'
 
 interface DashboardControlsProps {
-  selectedMonth: string
-  onMonthChange: (month: string) => void
+  dateRange: DateFilterRange
+  onDateRangeChange: (range: DateFilterRange) => void
   onOpenCategoryModal: () => void
   onOpenExportModal: () => void
   onOpenAddTxModal: () => void
   onOpenWhatsAppModal: () => void
+  onOpenReceiptModal: () => void
+  onOpenBankImportModal: () => void
+  onOpenBudgetModal?: () => void
+  onOpenSavingsGoalModal?: () => void
+  onOpenRecurringModal?: () => void
+  onOpenGoogleSheetsModal?: () => void
 }
 
 export function DashboardControls({
-  selectedMonth,
-  onMonthChange,
+  dateRange,
+  onDateRangeChange,
   onOpenCategoryModal,
   onOpenExportModal,
   onOpenAddTxModal,
   onOpenWhatsAppModal,
+  onOpenReceiptModal,
+  onOpenBankImportModal,
+  onOpenBudgetModal,
+  onOpenSavingsGoalModal,
+  onOpenRecurringModal,
+  onOpenGoogleSheetsModal,
 }: DashboardControlsProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
       <div className="flex items-center gap-3">
-        <Calendar className="w-5 h-5 text-indigo-400 shrink-0" />
-        <label htmlFor="month-filter" className="text-xs font-medium text-gray-400">
-          Filter Month:
+        <label htmlFor="date-range-filter" className="text-xs font-medium text-gray-400">
+          Filter Period:
         </label>
-        <input
-          id="month-filter"
-          type="month"
-          value={selectedMonth}
-          onChange={(e) => onMonthChange(e.target.value)}
-          className="bg-gray-900 border border-gray-700/80 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500"
-        />
+        <DateFilterPicker dateRange={dateRange} onDateRangeChange={onDateRangeChange} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        {onOpenRecurringModal && (
+          <Button
+            onClick={onOpenRecurringModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<Repeat className="w-3.5 h-3.5 text-purple-400" />}
+            className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border-purple-500/30"
+          >
+            Recurring Rules
+          </Button>
+        )}
+
+        {onOpenBudgetModal && (
+          <Button
+            onClick={onOpenBudgetModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<PieChart className="w-3.5 h-3.5 text-indigo-400" />}
+            className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
+          >
+            Category Budgets
+          </Button>
+        )}
+
+        {onOpenSavingsGoalModal && (
+          <Button
+            onClick={onOpenSavingsGoalModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<Target className="w-3.5 h-3.5 text-emerald-400" />}
+            className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
+          >
+            Savings Goals
+          </Button>
+        )}
+
+        <Button
+          onClick={onOpenBankImportModal}
+          variant="outline"
+          size="sm"
+          leftIcon={<FileSpreadsheet className="w-3.5 h-3.5 text-indigo-400" />}
+          className="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+        >
+          Import CSV / Excel
+        </Button>
+
+        {onOpenGoogleSheetsModal && (
+          <Button
+            onClick={onOpenGoogleSheetsModal}
+            variant="outline"
+            size="sm"
+            leftIcon={<RefreshCw className="w-3.5 h-3.5 text-emerald-400" />}
+            className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+          >
+            Google Sheets Sync
+          </Button>
+        )}
+
+        <Button
+          onClick={onOpenReceiptModal}
+          variant="outline"
+          size="sm"
+          leftIcon={<Scan className="w-3.5 h-3.5 text-amber-400" />}
+          className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30"
+        >
+          Scan Receipt
+        </Button>
+
+        <Button
           onClick={onOpenWhatsAppModal}
-          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          leftIcon={<MessageSquare className="w-3.5 h-3.5 text-emerald-400" />}
+          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
         >
-          <MessageSquare className="w-3.5 h-3.5 text-emerald-400" /> WhatsApp AI
-        </button>
+          WhatsApp AI
+        </Button>
 
-        <button
+        <Button
           onClick={onOpenCategoryModal}
-          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border border-gray-700/60 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          leftIcon={<Tag className="w-3.5 h-3.5 text-indigo-400" />}
+          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
         >
-          <Tag className="w-3.5 h-3.5 text-indigo-400" /> Categories
-        </button>
+          Categories
+        </Button>
 
-        <button
+        <Button
           onClick={onOpenExportModal}
-          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border border-gray-700/60 text-xs font-medium px-3.5 py-2 rounded-xl transition-all flex items-center gap-2"
+          variant="outline"
+          size="sm"
+          leftIcon={<Download className="w-3.5 h-3.5 text-emerald-400" />}
+          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
         >
-          <Download className="w-3.5 h-3.5 text-emerald-400" /> Export Data
-        </button>
+          Export Data
+        </Button>
 
-        <button
+        <Button
           onClick={onOpenAddTxModal}
-          className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2"
+          variant="primary"
+          size="sm"
+          leftIcon={<Plus className="w-4 h-4" />}
         >
-          <Plus className="w-4 h-4" /> Add Transaction
-        </button>
+          Add Transaction
+        </Button>
       </div>
     </div>
   )
 }
+

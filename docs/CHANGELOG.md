@@ -5,6 +5,38 @@ All notable changes to the **Meyker Financial Tracker** project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-08-20
+
+### 🎉 Added (Phase 3: Imports, Reports, Budgets & Savings Goals)
+- **Recurring Transactions & Subscriptions**:
+  - Setup automated recurring income and expense rules with custom frequencies (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`) (`RecurringTransactionModal.tsx`).
+  - Active subscription card overview with status toggling (activate/pause), edit action, and deletion (`RecurringTransactionCard.tsx`).
+  - Automated due-date engine that auto-logs entries into transaction history on due dates and advances rule next due date (`recurringUtils.ts`, `useDashboard.ts`).
+  - Reusable `DatePicker` component built with Radix `Popover` & `Calendar` for accessible single-date selection (`date-picker.tsx`).
+  - Official Radix `Dialog` modal integration supporting ESC key and backdrop click-to-close (`dialog.tsx`).
+  - Form control upgrades to `shadcn/ui` `Tabs`, `Select`, `Input`, and `Button` components across dashboard modals.
+- **Category Spending Budgets**:
+  - Monthly target spending caps configuration per expense category (`CategoryBudgetModal.tsx`).
+  - Dynamic visual progress bars on the web dashboard with color-coded health indicators: Emerald (<75%), Amber (75%–99%), and Rose alert badges (≥100%) (`CategoryBudgetCard.tsx`, `calculateCategoryBudgets`).
+- **Savings Goals Tracker**:
+  - Create personal savings goals with target amounts, current deposits, custom accent colors, and target dates (`SavingsGoalModal.tsx`, `SavingsGoalsCard.tsx`).
+  - Quick deposit modal to contribute funds directly toward any active savings goal (`calculateSavingsGoalProgress`).
+- **Monthly PDF Statement Generator**:
+  - Export branded, professional PDF financial statements and tax summaries using `jspdf` and `jspdf-autotable` (`exportToPdf`).
+  - Branded header banner, period metadata tag, and styled KPI Summary Cards (Net Balance, Total Income, Total Expenses).
+  - Categorized Expense Breakdown Table with percentage share calculation and itemized Transaction History Table with color-coded type tags (`INCOME` / `EXPENSE`).
+  - Dynamic page numbering (`Page X of Y`) and automatic multi-page overflow layout handling.
+- **Bank Statement & CSV/Excel Import Engine**:
+  - Bulk import support for CSV and Excel (`.xlsx`) bank statements (`BankStatementImportModal.tsx`).
+  - Auto-detection preset mapping for major Indonesian banks (BCA, Mandiri, BRI, CIMB Niaga) as well as Generic CSV formats (`detectBankFormat`).
+  - Interactive column mapping preview with manual field selector fallback (`mapRowsToTransactions`).
+  - Intelligent category keyword auto-matching based on transaction description/note or row category hints (`matchCategoryForTransaction`).
+  - One-click sample import template generator for CSV and Excel formats (`downloadImportTemplateCSV`, `downloadImportTemplateXLSX`).
+- **Vitest Unit Test Coverage**:
+  - Comprehensive unit test suite covering category budgets, savings goals, PDF generation, export modal triggers, bank statement parser, format detection, and import modal UI.
+
+---
+
 ## [0.2.1] - 2026-08-19
 
 ### ⚙️ Fixed & Improved

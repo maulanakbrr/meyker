@@ -47,15 +47,17 @@
 - **Real-time DB Synchronization**:
   - Instant Supabase DB entry logging (`source = 'WHATSAPP'`) and WhatsApp TwiML/Qiscus confirmation reply.
 
-### Phase 3: Imports, Advanced Sync & Reports (Future Roadmap)
-- **File Import Engine**:
-  - Bulk import from external bank statement CSV/Excel files with interactive column mapping UI.
-- **Monthly PDF Reports**:
-  - Automated PDF export for monthly financial statements and tax summaries.
+### Phase 3: Imports, Advanced Sync & Reports (In Progress)
+- **File Import Engine (Completed)**:
+  - Bulk import from external bank statement CSV/Excel files with bank format auto-detection (BCA, Mandiri, BRI, CIMB, Generic) and interactive column mapping UI.
+- **Monthly PDF Reports (Completed)**:
+  - Automated client-side PDF export for branded monthly financial statements, KPI metrics, category breakdowns, and tax summaries (`jsPDF` + `jspdf-autotable`).
 - **Live Sync with Google Sheets API**:
   - Two-way live synchronization using Google Sheets API (OAuth2).
-- **Savings Goals & Category Budgets**:
-  - Target budgets per category and savings goal tracker.
+- **Savings Goals & Category Budgets (Completed)**:
+  - Monthly spending caps per category with visual health bars and personal savings goals tracker with quick deposit contribution support.
+- **Recurring Transactions & Subscriptions (Completed)**:
+  - Automated recurring income and expense rules with custom frequencies (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), active subscription management, rule editing, Radix Dialog modals, and reusable single-date picker.
 
 ---
 

@@ -1,45 +1,55 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { DashboardControls } from '../DashboardControls'
+import { getDateRangeForPreset } from '../../../lib/dateUtils'
 
 describe('DashboardControls', () => {
-  it('renders selected month and triggers month change handler', () => {
-    const handleMonthChange = vi.fn()
+  it('renders filter period trigger button with current preset label', () => {
+    const handleRangeChange = vi.fn()
+    const sampleRange = getDateRangeForPreset('THIS_MONTH')
+
     render(
       <DashboardControls
-        selectedMonth="2026-07"
-        onMonthChange={handleMonthChange}
+        dateRange={sampleRange}
+        onDateRangeChange={handleRangeChange}
         onOpenCategoryModal={vi.fn()}
         onOpenExportModal={vi.fn()}
         onOpenAddTxModal={vi.fn()}
         onOpenWhatsAppModal={vi.fn()}
+        onOpenReceiptModal={vi.fn()}
+        onOpenBankImportModal={vi.fn()}
       />
     )
 
-    const monthInput = screen.getByLabelText(/filter month:/i) as HTMLInputElement
-    expect(monthInput.value).toBe('2026-07')
-
-    fireEvent.change(monthInput, { target: { value: '2026-08' } })
-    expect(handleMonthChange).toHaveBeenCalledWith('2026-08')
+    expect(screen.getByText('This Month')).toBeInTheDocument()
   })
 
   it('triggers modal opening callbacks when action buttons are clicked', () => {
     const handleOpenCat = vi.fn()
     const handleOpenExport = vi.fn()
     const handleOpenAddTx = vi.fn()
-
     const handleOpenWhatsApp = vi.fn()
+    const handleOpenReceipt = vi.fn()
+    const handleOpenBankImport = vi.fn()
 
     render(
       <DashboardControls
-        selectedMonth="2026-07"
-        onMonthChange={vi.fn()}
+        dateRange={getDateRangeForPreset('THIS_MONTH')}
+        onDateRangeChange={vi.fn()}
         onOpenCategoryModal={handleOpenCat}
         onOpenExportModal={handleOpenExport}
         onOpenAddTxModal={handleOpenAddTx}
         onOpenWhatsAppModal={handleOpenWhatsApp}
+        onOpenReceiptModal={handleOpenReceipt}
+        onOpenBankImportModal={handleOpenBankImport}
       />
     )
+
+    fireEvent.click(screen.getByRole('button', { name: /import csv \/ excel/i }))
+    expect(handleOpenBankImport).toHaveBeenCalledTimes(1)
+
+    fireEvent.click(screen.getByRole('button', { name: /scan receipt/i }))
+    expect(handleOpenReceipt).toHaveBeenCalledTimes(1)
 
     fireEvent.click(screen.getByRole('button', { name: /whatsapp ai/i }))
     expect(handleOpenWhatsApp).toHaveBeenCalledTimes(1)
@@ -54,3 +64,4 @@ describe('DashboardControls', () => {
     expect(handleOpenAddTx).toHaveBeenCalledTimes(1)
   })
 })
+

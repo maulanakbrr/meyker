@@ -16,9 +16,10 @@ describe('ExportModal', () => {
     expect(container.firstChild).toBeNull()
   })
 
-  it('renders record count and export buttons', () => {
+  it('renders record count and export buttons including PDF statement export', () => {
     const handleExportExcel = vi.fn()
     const handleExportCSV = vi.fn()
+    const handleExportPDF = vi.fn()
 
     render(
       <ExportModal
@@ -27,11 +28,16 @@ describe('ExportModal', () => {
         recordCount={5}
         onExportExcel={handleExportExcel}
         onExportCSV={handleExportCSV}
+        onExportPDF={handleExportPDF}
       />
     )
 
     expect(screen.getByText('Export Financial History')).toBeInTheDocument()
     expect(screen.getByText(/Export 5 records for selected filter period\./i)).toBeInTheDocument()
+
+    const pdfBtn = screen.getByRole('button', { name: /download pdf statement \(\.pdf\)/i })
+    fireEvent.click(pdfBtn)
+    expect(handleExportPDF).toHaveBeenCalledTimes(1)
 
     const excelBtn = screen.getByRole('button', { name: /download excel \(\.xlsx\)/i })
     fireEvent.click(excelBtn)

@@ -1,4 +1,5 @@
 import { Wallet, LogOut } from 'lucide-react'
+import { Button } from '../ui/button'
 
 interface DashboardHeaderProps {
   user: any
@@ -29,21 +30,23 @@ export function DashboardHeader({ user, onSignOut, onNavigateAuth }: DashboardHe
                   Pro Member
                 </span>
               </div>
-              <button
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={onSignOut}
-                className="p-2 rounded-xl bg-gray-800/80 hover:bg-gray-800 text-gray-400 hover:text-white transition-all border border-gray-700/50"
+                className="bg-gray-800/80 hover:bg-rose-500/20 text-gray-300 hover:text-rose-400 border-gray-700/60 hover:border-rose-500/30 transition-all cursor-pointer"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />
-              </button>
+              </Button>
             </div>
           ) : (
-            <button
+            <Button
               onClick={onNavigateAuth}
-              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 rounded-xl transition-all shadow-md shadow-indigo-600/20 flex items-center gap-2"
+              className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium px-4 py-2 shadow-md shadow-indigo-600/20 flex items-center gap-2 cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5 rotate-180" /> Log In / Register
-            </button>
+            </Button>
           )}
         </div>
       </div>

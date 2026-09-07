@@ -1,6 +1,7 @@
 export type TransactionType = 'INCOME' | 'EXPENSE'
-export type TransactionSource = 'WEB' | 'WHATSAPP' | 'IMPORT'
+export type TransactionSource = 'WEB' | 'WHATSAPP' | 'IMPORT' | 'RECURRING'
 export type PaymentMethod = 'CASH' | 'BANK_TRANSFER' | 'CREDIT_CARD' | 'E_WALLET'
+export type RecurringFrequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY'
 
 export interface Category {
   id: string
@@ -10,7 +11,39 @@ export interface Category {
   icon: string
   color: string
   isDefault: boolean
+  monthlyBudget?: number | null
   createdAt?: string
+}
+
+export interface SavingsGoal {
+  id: string
+  userId: string
+  name: string
+  targetAmount: number
+  currentAmount: number
+  color: string
+  icon: string
+  targetDate?: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface RecurringTransaction {
+  id: string
+  userId: string
+  title: string
+  amount: number
+  type: TransactionType
+  categoryId: string | null
+  paymentMethod: PaymentMethod
+  frequency: RecurringFrequency
+  startDate: string
+  nextDueDate: string
+  isActive: boolean
+  createdAt?: string
+  updatedAt?: string
+  // Populated fields
+  category?: Category | null
 }
 
 export interface Transaction {
