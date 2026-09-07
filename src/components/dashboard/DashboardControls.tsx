@@ -1,5 +1,21 @@
-import { Tag, Download, Plus, MessageSquare, Scan, FileSpreadsheet, PieChart, Target, Repeat, RefreshCw } from 'lucide-react'
+import { useState } from 'react'
+import {
+  Tag,
+  Download,
+  Plus,
+  MessageSquare,
+  Scan,
+  FileSpreadsheet,
+  PieChart,
+  Target,
+  Repeat,
+  RefreshCw,
+  ArrowUpDown,
+  MoreHorizontal,
+  ChevronDown,
+} from 'lucide-react'
 import { Button } from '../ui/button'
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
 import { DateFilterPicker } from './DateFilterPicker'
 import type { DateFilterRange } from '../../lib/dateUtils'
 
@@ -32,119 +48,205 @@ export function DashboardControls({
   onOpenRecurringModal,
   onOpenGoogleSheetsModal,
 }: DashboardControlsProps) {
+  const [dataSyncOpen, setDataSyncOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-5 rounded-2xl border border-white/10">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 sm:p-5 rounded-2xl border border-white/10">
+      {/* Left: Date Period Filter */}
       <div className="flex items-center gap-3">
-        <label htmlFor="date-range-filter" className="text-xs font-medium text-gray-400">
+        <label htmlFor="date-range-filter" className="text-xs font-medium text-gray-400 shrink-0">
           Filter Period:
         </label>
         <DateFilterPicker dateRange={dateRange} onDateRangeChange={onDateRangeChange} />
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {onOpenRecurringModal && (
-          <Button
-            onClick={onOpenRecurringModal}
-            variant="outline"
-            size="sm"
-            leftIcon={<Repeat className="w-3.5 h-3.5 text-purple-400" />}
-            className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border-purple-500/30"
-          >
-            Recurring Rules
-          </Button>
-        )}
+      {/* Right: Consolidated Action Toolbar */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        {/* 1. Data & Sync Dropdown */}
+        <Popover open={dataSyncOpen} onOpenChange={setDataSyncOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-gray-900/80 hover:bg-gray-800 text-gray-200 border-gray-800 gap-1.5 h-9 text-xs"
+            >
+              <ArrowUpDown className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Data & Sync</span>
+              <ChevronDown className="w-3 h-3 text-gray-400" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56 p-1.5 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl z-50">
+            <div className="space-y-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setDataSyncOpen(false)
+                  onOpenBankImportModal()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>Import CSV / Excel</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Bank statements & sheets</span>
+                </div>
+              </button>
 
-        {onOpenBudgetModal && (
-          <Button
-            onClick={onOpenBudgetModal}
-            variant="outline"
-            size="sm"
-            leftIcon={<PieChart className="w-3.5 h-3.5 text-indigo-400" />}
-            className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
-          >
-            Category Budgets
-          </Button>
-        )}
+              <button
+                type="button"
+                onClick={() => {
+                  setDataSyncOpen(false)
+                  onOpenExportModal()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <Download className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>Export Data</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Excel, CSV & PDF report</span>
+                </div>
+              </button>
 
-        {onOpenSavingsGoalModal && (
-          <Button
-            onClick={onOpenSavingsGoalModal}
-            variant="outline"
-            size="sm"
-            leftIcon={<Target className="w-3.5 h-3.5 text-emerald-400" />}
-            className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
-          >
-            Savings Goals
-          </Button>
-        )}
+              {onOpenGoogleSheetsModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDataSyncOpen(false)
+                    onOpenGoogleSheetsModal()
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4 text-teal-400 shrink-0" />
+                  <div className="flex flex-col">
+                    <span>Google Sheets Sync</span>
+                    <span className="text-[10px] text-gray-500 font-normal">Cloud spreadsheet backup</span>
+                  </div>
+                </button>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
 
-        <Button
-          onClick={onOpenBankImportModal}
-          variant="outline"
-          size="sm"
-          leftIcon={<FileSpreadsheet className="w-3.5 h-3.5 text-indigo-400" />}
-          className="bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
-        >
-          Import CSV / Excel
-        </Button>
+        {/* 2. More Settings & Shortcuts Dropdown */}
+        <Popover open={moreOpen} onOpenChange={setMoreOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-gray-900/80 hover:bg-gray-800 text-gray-200 border-gray-800 gap-1.5 h-9 text-xs"
+            >
+              <MoreHorizontal className="w-3.5 h-3.5 text-gray-400" />
+              <span>More</span>
+              <ChevronDown className="w-3 h-3 text-gray-400" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-56 p-1.5 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl z-50">
+            <div className="space-y-0.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  onOpenCategoryModal()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <Tag className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>Categories</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Manage icons & badges</span>
+                </div>
+              </button>
 
-        {onOpenGoogleSheetsModal && (
-          <Button
-            onClick={onOpenGoogleSheetsModal}
-            variant="outline"
-            size="sm"
-            leftIcon={<RefreshCw className="w-3.5 h-3.5 text-emerald-400" />}
-            className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-          >
-            Google Sheets Sync
-          </Button>
-        )}
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  onOpenWhatsAppModal()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <MessageSquare className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>WhatsApp AI</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Configure linked phone</span>
+                </div>
+              </button>
 
+              <div className="h-px bg-gray-800 my-1" />
+
+              {onOpenRecurringModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoreOpen(false)
+                    onOpenRecurringModal()
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+                >
+                  <Repeat className="w-4 h-4 text-purple-400 shrink-0" />
+                  <div className="flex flex-col">
+                    <span>Recurring Rules</span>
+                    <span className="text-[10px] text-gray-500 font-normal">Automated subscriptions</span>
+                  </div>
+                </button>
+              )}
+
+              {onOpenBudgetModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoreOpen(false)
+                    onOpenBudgetModal()
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+                >
+                  <PieChart className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <div className="flex flex-col">
+                    <span>Category Budgets</span>
+                    <span className="text-[10px] text-gray-500 font-normal">Monthly spending caps</span>
+                  </div>
+                </button>
+              )}
+
+              {onOpenSavingsGoalModal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMoreOpen(false)
+                    onOpenSavingsGoalModal()
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+                >
+                  <Target className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div className="flex flex-col">
+                    <span>Savings Goals</span>
+                    <span className="text-[10px] text-gray-500 font-normal">Target goals & deposits</span>
+                  </div>
+                </button>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* 3. Direct Quick Input: Scan Receipt */}
         <Button
           onClick={onOpenReceiptModal}
           variant="outline"
           size="sm"
           leftIcon={<Scan className="w-3.5 h-3.5 text-amber-400" />}
-          className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/30"
+          className="bg-gray-900/80 hover:bg-gray-800 text-gray-200 border-gray-800 h-9 text-xs"
         >
           Scan Receipt
         </Button>
 
-        <Button
-          onClick={onOpenWhatsAppModal}
-          variant="outline"
-          size="sm"
-          leftIcon={<MessageSquare className="w-3.5 h-3.5 text-emerald-400" />}
-          className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-        >
-          WhatsApp AI
-        </Button>
-
-        <Button
-          onClick={onOpenCategoryModal}
-          variant="outline"
-          size="sm"
-          leftIcon={<Tag className="w-3.5 h-3.5 text-indigo-400" />}
-          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
-        >
-          Categories
-        </Button>
-
-        <Button
-          onClick={onOpenExportModal}
-          variant="outline"
-          size="sm"
-          leftIcon={<Download className="w-3.5 h-3.5 text-emerald-400" />}
-          className="bg-gray-800/90 hover:bg-gray-800 text-gray-200 border-gray-700/60"
-        >
-          Export Data
-        </Button>
-
+        {/* 4. Primary CTA: Add Transaction */}
         <Button
           onClick={onOpenAddTxModal}
           variant="primary"
           size="sm"
           leftIcon={<Plus className="w-4 h-4" />}
+          className="h-9 text-xs shadow-lg shadow-indigo-600/20 font-medium"
         >
           Add Transaction
         </Button>
