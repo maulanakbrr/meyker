@@ -59,6 +59,12 @@
 - **Recurring Transactions & Subscriptions (Completed)**:
   - Automated recurring income and expense rules with custom frequencies (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), active subscription management, rule editing, Radix Dialog modals, and reusable single-date picker.
 
+### Phase 4: State Architecture, Performance & Modularization (In Progress)
+- **Modular Zustand Stores**:
+  - Encapsulate form draft states (`useTransactionFormStore`, `useCategoryFormStore`) inside isolated form stores to eliminate keystroke re-renders.
+  - Centralize dialog management with `useModalStore` to replace prop-drilled modal toggles and consolidate 12+ dashboard control callbacks.
+  - Decompose monolithic business logic in `useDashboard.ts` into domain stores (`useAuthStore`, `useFilterStore`, `useFinanceStore`).
+
 ---
 
 ## 4. Scope Guardrails & Backlog Management
@@ -70,10 +76,12 @@
 
 ### Tech Stack
 - **Frontend**: React + TanStack Start (SSR / routing), Tailwind CSS, shadcn UI / modern component patterns.
+- **State Management**: Zustand (modular domain and isolated form stores).
 - **Database / Backend**: PostgreSQL via Supabase (Auth, Row Level Security, DB Host).
 - **ORM**: Drizzle ORM (`drizzle-orm`, `drizzle-kit`).
 - **Export Engine**: ExcelJS for `.xlsx` and CSV generation.
 - **Icons & Visualization**: Lucide React & Recharts / Custom SVG Charts.
+- **Testing**: Vitest + React Testing Library + jsdom.
 - **CI/CD**: GitHub Actions workflow (`.github/workflows/ci.yml`).
 
 ### Database Schema Definition (PostgreSQL / Drizzle ORM)

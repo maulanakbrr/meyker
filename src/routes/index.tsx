@@ -29,7 +29,7 @@ export const Route = createFileRoute('/')({
   component: DashboardPage,
 })
 
-function DashboardPage() {
+export function DashboardPage() {
   const dashboard = useDashboard()
 
   if (dashboard.loadingAuth) {

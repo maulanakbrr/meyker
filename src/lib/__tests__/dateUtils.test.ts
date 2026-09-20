@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   getDateRangeForPreset,
+  formatDateISO,
   isDateInRange,
   formatShortDate,
   getDateFilterPeriodLabel,
@@ -9,7 +10,7 @@ import {
 describe('dateUtils', () => {
   it('correctly calculates date range for TODAY preset', () => {
     const range = getDateRangeForPreset('TODAY')
-    const today = new Date().toISOString().slice(0, 10)
+    const today = formatDateISO(new Date())
     expect(range.startDate).toBe(today)
     expect(range.endDate).toBe(today)
     expect(range.label).toBe('Today')

@@ -20,11 +20,18 @@ import {
 import { calculateNextDueDate, getDueRecurringRules } from '../lib/recurringUtils'
 
 import { getDateRangeForPreset, type DateFilterRange } from '../lib/dateUtils'
+import {
+  MOCK_CATEGORIES,
+  MOCK_TRANSACTIONS,
+  MOCK_SAVINGS_GOALS,
+  MOCK_RECURRING_RULES,
+} from '../lib/mockData'
 
 export function useDashboard() {
   const navigate = useNavigate()
   const [user, setUser] = useState<any>(null)
   const [loadingAuth, setLoadingAuth] = useState(true)
+  const [isDemoMode, setIsDemoMode] = useState(false)
 
   // Domain State
   const [categories, setCategories] = useState<Category[]>([])
@@ -75,6 +82,20 @@ export function useDashboard() {
 
   // Fetch Supabase Auth User & Sync DB Data
   useEffect(() => {
+    const isDemoRoute = typeof window !== 'undefined' && window.location.pathname === '/demo'
+    const isDemo = isDemoRoute || localStorage.getItem('meyker_demo_mode') === 'true'
+    
+    if (isDemo) {
+      setIsDemoMode(true)
+      setUser({ id: 'demo-user', email: 'demo@meyker.local' })
+      setCategories(MOCK_CATEGORIES)
+      setTransactions(MOCK_TRANSACTIONS)
+      setSavingsGoals(MOCK_SAVINGS_GOALS)
+      setRecurringRules(MOCK_RECURRING_RULES)
+      setLoadingAuth(false)
+      return
+    }
+
     // If this window is an OAuth popup callback, wait for Supabase session exchange before closing popup
     if (window.opener && window.opener !== window) {
       let isClosed = false
@@ -205,7 +226,7 @@ export function useDashboard() {
         prev.map((r) => (r.id === rule.id ? { ...r, nextDueDate: nextDue } : r))
       )
 
-      if (user?.id) {
+      if (user?.id && !isDemoMode) {
         try {
           await supabase.from('transactions').insert({
             user_id: user.id,
@@ -407,7 +428,7 @@ export function useDashboard() {
       category: selectedCat,
     }
 
-    if (user?.id) {
+    if (user?.id && !isDemoMode) {
       try {
         const { data, error } = await supabase
           .from('transactions')
@@ -485,7 +506,7 @@ export function useDashboard() {
       isDefault: false,
     }
 
-    if (user?.id) {
+    if (user?.id && !isDemoMode) {
       try {
         const { data } = await supabase
           .from('categories')
@@ -517,7 +538,7 @@ export function useDashboard() {
   const handleDeleteTransaction = async (id: string) => {
     if (!confirm('Are you sure you want to delete this transaction record?')) return
 
-    if (user?.id) {
+    if (user?.id && !isDemoMode) {
       try {
         await supabase.from('transactions').delete().eq('id', id)
       } catch (err) {
@@ -668,7 +689,7 @@ export function useDashboard() {
       localStorage.setItem('meyker_category_budgets', JSON.stringify(budgetMap))
     } catch (e) {}
 
-    if (user) {
+    if (user && !isDemoMode) {
       for (const [catId, budgetVal] of Object.entries(updatedMap)) {
         const { error } = await supabase
           .from('categories')
@@ -709,7 +730,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user) {
+    if (user && !isDemoMode) {
       const { data, error } = await supabase
         .from('savings_goals')
         .insert({
@@ -755,7 +776,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user && updatedGoal) {
+    if (user && updatedGoal && !isDemoMode) {
       const { error } = await supabase
         .from('savings_goals')
         .update({ current_amount: updatedGoal.currentAmount })
@@ -779,7 +800,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user) {
+    if (user && !isDemoMode) {
       const { error } = await supabase
         .from('savings_goals')
         .update({
@@ -805,7 +826,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user) {
+    if (user && !isDemoMode) {
       const { error } = await supabase.from('savings_goals').delete().eq('id', goalId)
       if (error) {
         console.error('[Dashboard DB Error] Failed to delete savings goal:', error.message || error)
@@ -845,7 +866,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user) {
+    if (user && !isDemoMode) {
       const { data, error } = await supabase
         .from('recurring_transactions')
         .insert({
@@ -887,7 +908,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user) {
+    if (user && !isDemoMode) {
       const { error } = await supabase
         .from('recurring_transactions')
         .update({ is_active: nextActive })
@@ -927,7 +948,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user) {
+    if (user && !isDemoMode) {
       const { error } = await supabase
         .from('recurring_transactions')
         .update({
@@ -954,7 +975,7 @@ export function useDashboard() {
       return next
     })
 
-    if (user) {
+    if (user && !isDemoMode) {
       const { error } = await supabase.from('recurring_transactions').delete().eq('id', ruleId)
       if (error) {
         console.error('[Dashboard DB Error] Failed to delete recurring rule:', error.message || error)
@@ -962,11 +983,22 @@ export function useDashboard() {
     }
   }
 
+  const handleSignOut = async () => {
+    if (isDemoMode) {
+      localStorage.removeItem('meyker_demo_mode')
+      setIsDemoMode(false)
+      navigate({ to: '/login' })
+    } else {
+      await signOut()
+      navigate({ to: '/login' })
+    }
+  }
+
   return {
     navigate,
     user,
     loadingAuth,
-    signOut,
+    signOut: handleSignOut,
 
     // Data State
     categories,

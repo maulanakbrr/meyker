@@ -5,6 +5,23 @@ All notable changes to the **Meyker Financial Tracker** project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - Unreleased
+
+### 🏗️ Planned / In Progress (Phase 4: State Architecture & Performance Refactoring)
+- **Zustand State Architecture Migration**:
+  - Transition from monolithic `useDashboard.ts` hook (~1,100 lines) to modular, domain-specific Zustand stores.
+- **Form State Stores (`src/stores/forms/`)**:
+  - `useTransactionFormStore`: Isolate form draft states (amount, category, payment method, date, note) to prevent full dashboard re-renders on every keystroke.
+  - `useCategoryFormStore`: Dedicated store for custom category creation state.
+- **Unified Modal Store (`useModalStore.ts`)**:
+  - Consolidate 10 separate boolean visibility flags and 12 drilled callbacks into a single active modal state manager (`openModal`, `closeModal`).
+- **Domain Store Decomposition**:
+  - `useAuthStore`: Handle user session, profile metadata, demo mode, and OAuth popup messaging.
+  - `useFilterStore`: Manage dashboard date ranges, search queries, and category/type filters.
+  - `useFinanceStore`: Manage core entities (transactions, categories, budgets, savings goals, recurring rules) and Supabase CRUD operations.
+
+---
+
 ## [0.3.0] - 2026-08-20
 
 ### 🎉 Added (Phase 3: Imports, Reports, Budgets & Savings Goals)
