@@ -18,16 +18,17 @@ import { Button } from '../ui/button'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
 import { DateFilterPicker } from './DateFilterPicker'
 import type { DateFilterRange } from '../../lib/dateUtils'
+import { useModalStore } from '../../stores'
 
 interface DashboardControlsProps {
   dateRange: DateFilterRange
   onDateRangeChange: (range: DateFilterRange) => void
-  onOpenCategoryModal: () => void
-  onOpenExportModal: () => void
-  onOpenAddTxModal: () => void
-  onOpenWhatsAppModal: () => void
-  onOpenReceiptModal: () => void
-  onOpenBankImportModal: () => void
+  onOpenCategoryModal?: () => void
+  onOpenExportModal?: () => void
+  onOpenAddTxModal?: () => void
+  onOpenWhatsAppModal?: () => void
+  onOpenReceiptModal?: () => void
+  onOpenBankImportModal?: () => void
   onOpenBudgetModal?: () => void
   onOpenSavingsGoalModal?: () => void
   onOpenRecurringModal?: () => void
@@ -50,6 +51,18 @@ export function DashboardControls({
 }: DashboardControlsProps) {
   const [dataSyncOpen, setDataSyncOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
+  const modalStore = useModalStore()
+
+  const handleOpenCategory = onOpenCategoryModal ?? (() => modalStore.openModal('CATEGORY_MANAGEMENT'))
+  const handleOpenExport = onOpenExportModal ?? (() => modalStore.openModal('EXPORT'))
+  const handleOpenAddTx = onOpenAddTxModal ?? (() => modalStore.openModal('ADD_TRANSACTION'))
+  const handleOpenWhatsApp = onOpenWhatsAppModal ?? (() => modalStore.openModal('WHATSAPP_SETTINGS'))
+  const handleOpenReceipt = onOpenReceiptModal ?? (() => modalStore.openModal('RECEIPT_UPLOAD'))
+  const handleOpenBankImport = onOpenBankImportModal ?? (() => modalStore.openModal('BANK_IMPORT'))
+  const handleOpenBudget = onOpenBudgetModal ?? (() => modalStore.openModal('CATEGORY_BUDGET'))
+  const handleOpenSavingsGoal = onOpenSavingsGoalModal ?? (() => modalStore.openSavingsGoal('CREATE'))
+  const handleOpenRecurring = onOpenRecurringModal ?? (() => modalStore.openRecurring())
+  const handleOpenGoogleSheets = onOpenGoogleSheetsModal ?? (() => modalStore.openModal('GOOGLE_SHEETS'))
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-panel p-4 sm:p-5 rounded-2xl border border-white/10">
@@ -82,7 +95,7 @@ export function DashboardControls({
                 type="button"
                 onClick={() => {
                   setDataSyncOpen(false)
-                  onOpenBankImportModal()
+                  handleOpenBankImport()
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
               >
@@ -97,7 +110,7 @@ export function DashboardControls({
                 type="button"
                 onClick={() => {
                   setDataSyncOpen(false)
-                  onOpenExportModal()
+                  handleOpenExport()
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
               >
@@ -108,22 +121,20 @@ export function DashboardControls({
                 </div>
               </button>
 
-              {onOpenGoogleSheetsModal && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDataSyncOpen(false)
-                    onOpenGoogleSheetsModal()
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
-                >
-                  <RefreshCw className="w-4 h-4 text-teal-400 shrink-0" />
-                  <div className="flex flex-col">
-                    <span>Google Sheets Sync</span>
-                    <span className="text-[10px] text-gray-500 font-normal">Cloud spreadsheet backup</span>
-                  </div>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setDataSyncOpen(false)
+                  handleOpenGoogleSheets()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <RefreshCw className="w-4 h-4 text-teal-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>Google Sheets Sync</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Cloud spreadsheet backup</span>
+                </div>
+              </button>
             </div>
           </PopoverContent>
         </Popover>
@@ -147,7 +158,7 @@ export function DashboardControls({
                 type="button"
                 onClick={() => {
                   setMoreOpen(false)
-                  onOpenCategoryModal()
+                  handleOpenCategory()
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
               >
@@ -162,7 +173,7 @@ export function DashboardControls({
                 type="button"
                 onClick={() => {
                   setMoreOpen(false)
-                  onOpenWhatsAppModal()
+                  handleOpenWhatsApp()
                 }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
               >
@@ -175,63 +186,57 @@ export function DashboardControls({
 
               <div className="h-px bg-gray-800 my-1" />
 
-              {onOpenRecurringModal && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMoreOpen(false)
-                    onOpenRecurringModal()
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
-                >
-                  <Repeat className="w-4 h-4 text-purple-400 shrink-0" />
-                  <div className="flex flex-col">
-                    <span>Recurring Rules</span>
-                    <span className="text-[10px] text-gray-500 font-normal">Automated subscriptions</span>
-                  </div>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  handleOpenRecurring()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <Repeat className="w-4 h-4 text-purple-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>Recurring Rules</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Automated subscriptions</span>
+                </div>
+              </button>
 
-              {onOpenBudgetModal && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMoreOpen(false)
-                    onOpenBudgetModal()
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
-                >
-                  <PieChart className="w-4 h-4 text-indigo-400 shrink-0" />
-                  <div className="flex flex-col">
-                    <span>Category Budgets</span>
-                    <span className="text-[10px] text-gray-500 font-normal">Monthly spending caps</span>
-                  </div>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  handleOpenBudget()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <PieChart className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>Category Budgets</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Monthly spending caps</span>
+                </div>
+              </button>
 
-              {onOpenSavingsGoalModal && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMoreOpen(false)
-                    onOpenSavingsGoalModal()
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
-                >
-                  <Target className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <div className="flex flex-col">
-                    <span>Savings Goals</span>
-                    <span className="text-[10px] text-gray-500 font-normal">Target goals & deposits</span>
-                  </div>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setMoreOpen(false)
+                  handleOpenSavingsGoal()
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-gray-300 hover:text-white hover:bg-gray-900 rounded-lg transition-colors text-left cursor-pointer"
+              >
+                <Target className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="flex flex-col">
+                  <span>Savings Goals</span>
+                  <span className="text-[10px] text-gray-500 font-normal">Target goals & deposits</span>
+                </div>
+              </button>
             </div>
           </PopoverContent>
         </Popover>
 
         {/* 3. Direct Quick Input: Scan Receipt */}
         <Button
-          onClick={onOpenReceiptModal}
+          onClick={handleOpenReceipt}
           variant="outline"
           size="sm"
           leftIcon={<Scan className="w-3.5 h-3.5 text-amber-400" />}
@@ -242,7 +247,7 @@ export function DashboardControls({
 
         {/* 4. Primary CTA: Add Transaction */}
         <Button
-          onClick={onOpenAddTxModal}
+          onClick={handleOpenAddTx}
           variant="primary"
           size="sm"
           leftIcon={<Plus className="w-4 h-4" />}

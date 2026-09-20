@@ -4,11 +4,12 @@ import { formatFrequencyLabel } from '../../lib/recurringUtils'
 import { formatIdrCurrency } from '../../lib/export'
 import { Repeat, Plus, Trash2, Calendar, ArrowUpRight, ArrowDownRight, Power, Edit3 } from 'lucide-react'
 import { Button } from '../ui/button'
+import { useModalStore } from '../../stores'
 
 interface RecurringTransactionCardProps {
   recurringRules: RecurringTransaction[]
-  onOpenModal: () => void
-  onEditRule: (rule: RecurringTransaction) => void
+  onOpenModal?: () => void
+  onEditRule?: (rule: RecurringTransaction) => void
   onToggleActive: (id: string, currentActive: boolean) => void
   onDeleteRule: (id: string) => void
 }
@@ -20,6 +21,9 @@ export const RecurringTransactionCard: React.FC<RecurringTransactionCardProps> =
   onToggleActive,
   onDeleteRule,
 }) => {
+  const modalStore = useModalStore()
+  const handleOpen = onOpenModal ?? (() => modalStore.openRecurring())
+  const handleEdit = onEditRule ?? ((rule) => modalStore.openRecurring(rule))
   const activeCount = recurringRules.filter((r) => r.isActive).length
 
   return (
@@ -38,7 +42,7 @@ export const RecurringTransactionCard: React.FC<RecurringTransactionCardProps> =
         </div>
 
         <Button
-          onClick={onOpenModal}
+          onClick={handleOpen}
           variant="outline"
           size="sm"
           leftIcon={<Plus className="w-3.5 h-3.5 text-purple-400" />}
@@ -124,7 +128,7 @@ export const RecurringTransactionCard: React.FC<RecurringTransactionCardProps> =
 
                   <div className="flex items-center gap-0.5">
                     <button
-                      onClick={() => onEditRule(rule)}
+                      onClick={() => handleEdit(rule)}
                       title="Edit recurring rule"
                       className="p-1 rounded-lg text-gray-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors cursor-pointer"
                     >

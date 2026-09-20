@@ -5,44 +5,49 @@ import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { DatePicker } from '../ui/date-picker'
+import { useTransactionFormStore } from '../../stores'
 
 interface AddTransactionModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (e: React.FormEvent) => void
   categories: Category[]
-  txType: TransactionType
-  setTxType: (type: TransactionType) => void
-  txAmount: string
-  setTxAmount: (val: string) => void
-  txCategory: string
-  setTxCategory: (catId: string) => void
-  txDate: string
-  setTxDate: (date: string) => void
-  txPaymentMethod: PaymentMethod
-  setTxPaymentMethod: (method: PaymentMethod) => void
-  txNote: string
-  setTxNote: (note: string) => void
+  txType?: TransactionType
+  setTxType?: (type: TransactionType) => void
+  txAmount?: string
+  setTxAmount?: (val: string) => void
+  txCategory?: string
+  setTxCategory?: (catId: string) => void
+  txDate?: string
+  setTxDate?: (date: string) => void
+  txPaymentMethod?: PaymentMethod
+  setTxPaymentMethod?: (method: PaymentMethod) => void
+  txNote?: string
+  setTxNote?: (note: string) => void
 }
 
-export function AddTransactionModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  categories,
-  txType,
-  setTxType,
-  txAmount,
-  setTxAmount,
-  txCategory,
-  setTxCategory,
-  txDate,
-  setTxDate,
-  txPaymentMethod,
-  setTxPaymentMethod,
-  txNote,
-  setTxNote,
-}: AddTransactionModalProps) {
+export function AddTransactionModal(props: AddTransactionModalProps) {
+  const formStore = useTransactionFormStore()
+
+  const {
+    isOpen,
+    onClose,
+    onSubmit,
+    categories,
+    txType = formStore.type,
+    setTxType = formStore.setType,
+    txAmount = formStore.amount,
+    setTxAmount = formStore.setAmount,
+    txCategory = formStore.categoryId,
+    setTxCategory = formStore.setCategory,
+    txDate = formStore.date,
+    setTxDate = formStore.setDate,
+    txPaymentMethod = formStore.paymentMethod,
+    setTxPaymentMethod = formStore.setPaymentMethod,
+    txNote = formStore.note,
+    setTxNote = formStore.setNote,
+  } = props
+
   const categoryOptions = categories.filter((c) => c.type === txType)
 
   return (
