@@ -29,7 +29,24 @@ It empowers individuals, freelancers, and small business owners to track income 
   - Filter transactions by Month (`YYYY-MM`), Category, and Type (`INCOME`, `EXPENSE`, `ALL`).
   - Instant live keyword search across notes and category names.
 
+- **🎯 Category Spending Budgets**:
+  - Monthly target spending caps per expense category.
+  - Dynamic progress bars with color-coded health indicators on the dashboard.
+
+- **💰 Savings Goals Tracker**:
+  - Create personal savings goals with target amounts, current deposits, custom colors, and target dates.
+  - Quick deposit system to contribute funds and track progress.
+
+- **🔁 Recurring Transactions & Subscriptions**:
+  - Setup automated recurring income and expense rules with custom frequencies (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`).
+  - Active subscription overview with status toggling and automated due-date execution.
+
+- **🏦 Bank Statement Imports**:
+  - Bulk import support for CSV and Excel (`.xlsx`) bank statements.
+  - Smart auto-detection for major Indonesian banks (BCA, Mandiri, BRI, CIMB Niaga) and intelligent category auto-matching.
+
 - **📥 Data Export Engine**:
+  - **Professional PDF Statements**: Branded PDF financial statements and tax summaries with categorized breakdowns and transaction history.
   - **Excel (`.xlsx`) Export**: Professionally formatted spreadsheets using **ExcelJS** complete with headers, number formatting, and formula totals.
   - **CSV Export**: Clean CSV download for spreadsheet tools and raw data analysis.
 

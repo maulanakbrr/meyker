@@ -3,11 +3,12 @@ import { Button } from '../ui/button'
 import { formatIdrCurrency } from '../../lib/export'
 import { calculateSavingsGoalProgress } from '../../lib/dashboardUtils'
 import type { SavingsGoal } from '../../types'
+import { useModalStore } from '../../stores'
 
 interface SavingsGoalsCardProps {
   goals: SavingsGoal[]
-  onOpenCreateGoalModal: () => void
-  onOpenDepositModal: (goal: SavingsGoal) => void
+  onOpenCreateGoalModal?: () => void
+  onOpenDepositModal?: (goal: SavingsGoal) => void
   onOpenEditModal?: (goal: SavingsGoal) => void
 }
 
@@ -17,6 +18,10 @@ export function SavingsGoalsCard({
   onOpenDepositModal,
   onOpenEditModal,
 }: SavingsGoalsCardProps) {
+  const modalStore = useModalStore()
+  const handleCreate = onOpenCreateGoalModal ?? (() => modalStore.openSavingsGoal('CREATE'))
+  const handleDeposit = onOpenDepositModal ?? ((goal) => modalStore.openSavingsGoal('DEPOSIT', goal))
+  const handleEdit = onOpenEditModal ?? ((goal) => modalStore.openSavingsGoal('EDIT', goal))
   return (
     <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-start">
       <div className="flex items-center justify-between">
@@ -31,7 +36,7 @@ export function SavingsGoalsCard({
         </div>
 
         <Button
-          onClick={onOpenCreateGoalModal}
+          onClick={handleCreate}
           variant="outline"
           size="sm"
           leftIcon={<Plus className="w-3.5 h-3.5 text-emerald-400" />}
@@ -48,7 +53,7 @@ export function SavingsGoalsCard({
             No savings goals created yet. Set targets like Emergency Fund, New Gadget, or Vacation to stay motivated!
           </p>
           <Button
-            onClick={onOpenCreateGoalModal}
+            onClick={handleCreate}
             size="sm"
             variant="outline"
             leftIcon={<Plus className="w-3.5 h-3.5 text-emerald-400" />}
@@ -82,18 +87,16 @@ export function SavingsGoalsCard({
                   </div>
 
                   <div className="flex items-center gap-1">
-                    {onOpenEditModal && (
-                      <Button
-                        onClick={() => onOpenEditModal(g)}
-                        variant="ghost"
-                        size="sm"
-                        className="text-[11px] h-6 px-2 text-gray-400 hover:text-white hover:bg-gray-800"
-                      >
-                        <Pencil className="w-3 h-3 mr-1" /> Edit
-                      </Button>
-                    )}
                     <Button
-                      onClick={() => onOpenDepositModal(g)}
+                      onClick={() => handleEdit(g)}
+                      variant="ghost"
+                      size="sm"
+                      className="text-[11px] h-6 px-2 text-gray-400 hover:text-white hover:bg-gray-800"
+                    >
+                      <Pencil className="w-3 h-3 mr-1" /> Edit
+                    </Button>
+                    <Button
+                      onClick={() => handleDeposit(g)}
                       variant="ghost"
                       size="sm"
                       className="text-[11px] h-6 px-2 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10"

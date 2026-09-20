@@ -40,7 +40,12 @@ This document tracks future feature ideas, operational notes, and roadmap items.
 
 ## 🎨 Phase 4: Advanced UX, Insights & Optimization
 - [x] **Dashboard Toolbar UX Refactoring & Action Consolidation**: Consolidate 10 scattered multi-color action buttons into unified Radix Popover menus (`Data & Sync` and `More`), sleek dark aesthetic, and clean hierarchy.
-- [ ] **Demo Mode / Mock Data Showcase**: Instant live preview mode on login and dashboard with pre-populated sample transactions, visual metrics, categories, budgets, and savings goals without requiring Supabase credentials.
+- [x] **Demo Mode / Mock Data Showcase**: Instant live preview mode on login and dashboard with pre-populated sample transactions, visual metrics, categories, budgets, and savings goals without requiring Supabase credentials.
+- [ ] **Zustand State Architecture Migration & Prop Drilling Elimination (In Progress)**:
+  - [ ] **Step 1: Form Stores (`src/stores/forms/`)**: Isolate form draft states (`useTransactionFormStore`, `useCategoryFormStore`) to stop keystrokes from re-rendering the entire dashboard and charts.
+  - [ ] **Step 2: Centralized Modal Store (`useModalStore.ts`)**: Consolidate 10 separate boolean flags into a single active modal manager, eliminating 12 drilled callbacks in `DashboardControls` and cards.
+  - [ ] **Step 3: Domain Stores Decomposition**: Split the ~1,100-line `useDashboard.ts` hook into `useAuthStore`, `useFilterStore`, and `useFinanceStore`.
+  - [ ] **Step 4: Quality & Test Coverage**: Update Vitest tests for modals, controls, and dashboard page to ensure 100% test passing across the new stores.
 
 ---
 

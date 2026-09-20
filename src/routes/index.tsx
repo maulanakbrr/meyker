@@ -25,12 +25,15 @@ import { supabase } from '../lib/supabase'
 import { RecurringTransactionCard } from '../components/dashboard/RecurringTransactionCard'
 import { RecurringTransactionModal } from '../components/dashboard/RecurringTransactionModal'
 
+import { useModalStore } from '../stores'
+
 export const Route = createFileRoute('/')({
   component: DashboardPage,
 })
 
-function DashboardPage() {
+export function DashboardPage() {
   const dashboard = useDashboard()
+  const modalStore = useModalStore()
 
   if (dashboard.loadingAuth) {
     return (
@@ -64,22 +67,6 @@ function DashboardPage() {
         <DashboardControls
           dateRange={dashboard.dateRange}
           onDateRangeChange={dashboard.setDateRange}
-          onOpenCategoryModal={() => dashboard.setShowCatModal(true)}
-          onOpenExportModal={() => dashboard.setShowExportModal(true)}
-          onOpenAddTxModal={() => dashboard.setShowAddTxModal(true)}
-          onOpenWhatsAppModal={() => dashboard.setShowWhatsAppModal(true)}
-          onOpenReceiptModal={() => dashboard.setShowReceiptModal(true)}
-          onOpenBankImportModal={() => dashboard.setShowBankImportModal(true)}
-          onOpenBudgetModal={() => dashboard.setShowBudgetModal(true)}
-          onOpenSavingsGoalModal={() => {
-            dashboard.setTargetDepositGoal(null)
-            dashboard.setShowSavingsGoalModal(true)
-          }}
-          onOpenGoogleSheetsModal={() => dashboard.setShowGoogleSheetsModal(true)}
-          onOpenRecurringModal={() => {
-            dashboard.setTargetEditRule(null)
-            dashboard.setShowRecurringModal(true)
-          }}
         />
 
         {/* 3 Summary Stat Cards */}
@@ -87,38 +74,10 @@ function DashboardPage() {
 
         {/* Category Budgets, Savings Goals & Recurring Transactions Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <CategoryBudgetCard
-            budgets={dashboard.categoryBudgetsData}
-            onOpenBudgetModal={() => dashboard.setShowBudgetModal(true)}
-          />
-          <SavingsGoalsCard
-            goals={dashboard.savingsGoals}
-            onOpenCreateGoalModal={() => {
-              dashboard.setSavingsGoalModalMode('CREATE')
-              dashboard.setTargetDepositGoal(null)
-              dashboard.setShowSavingsGoalModal(true)
-            }}
-            onOpenDepositModal={(goal) => {
-              dashboard.setSavingsGoalModalMode('DEPOSIT')
-              dashboard.setTargetDepositGoal(goal)
-              dashboard.setShowSavingsGoalModal(true)
-            }}
-            onOpenEditModal={(goal) => {
-              dashboard.setSavingsGoalModalMode('EDIT')
-              dashboard.setTargetDepositGoal(goal)
-              dashboard.setShowSavingsGoalModal(true)
-            }}
-          />
+          <CategoryBudgetCard budgets={dashboard.categoryBudgetsData} />
+          <SavingsGoalsCard goals={dashboard.savingsGoals} />
           <RecurringTransactionCard
             recurringRules={dashboard.recurringRules}
-            onOpenModal={() => {
-              dashboard.setTargetEditRule(null)
-              dashboard.setShowRecurringModal(true)
-            }}
-            onEditRule={(rule) => {
-              dashboard.setTargetEditRule(rule)
-              dashboard.setShowRecurringModal(true)
-            }}
             onToggleActive={dashboard.handleToggleRecurringRule}
             onDeleteRule={dashboard.handleDeleteRecurringRule}
           />
@@ -146,53 +105,49 @@ function DashboardPage() {
 
       {/* Modals */}
       <ReceiptUploadModal
-        isOpen={dashboard.showReceiptModal}
-        onClose={() => dashboard.setShowReceiptModal(false)}
+        isOpen={modalStore.activeModal === 'RECEIPT_UPLOAD' || dashboard.showReceiptModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowReceiptModal(false)
+        }}
         onReceiptExtracted={dashboard.handleReceiptExtracted}
       />
 
       <AddTransactionModal
-        isOpen={dashboard.showAddTxModal}
-        onClose={() => dashboard.setShowAddTxModal(false)}
+        isOpen={modalStore.activeModal === 'ADD_TRANSACTION' || dashboard.showAddTxModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowAddTxModal(false)
+        }}
         onSubmit={dashboard.handleCreateTransaction}
         categories={dashboard.categories}
-        txType={dashboard.txType}
-        setTxType={dashboard.setTxType}
-        txAmount={dashboard.txAmount}
-        setTxAmount={dashboard.setTxAmount}
-        txCategory={dashboard.txCategory}
-        setTxCategory={dashboard.setTxCategory}
-        txDate={dashboard.txDate}
-        setTxDate={dashboard.setTxDate}
-        txPaymentMethod={dashboard.txPaymentMethod}
-        setTxPaymentMethod={dashboard.setTxPaymentMethod}
-        txNote={dashboard.txNote}
-        setTxNote={dashboard.setTxNote}
       />
 
       <CategoryManagementModal
-        isOpen={dashboard.showCatModal}
-        onClose={() => dashboard.setShowCatModal(false)}
+        isOpen={modalStore.activeModal === 'CATEGORY_MANAGEMENT' || dashboard.showCatModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowCatModal(false)
+        }}
         onSubmit={dashboard.handleCreateCategory}
         categories={dashboard.categories}
-        catName={dashboard.catName}
-        setCatName={dashboard.setCatName}
-        catType={dashboard.catType}
-        setCatType={dashboard.setCatType}
-        catColor={dashboard.catColor}
-        setCatColor={dashboard.setCatColor}
       />
 
       <ExportModal
-        isOpen={dashboard.showExportModal}
-        onClose={() => dashboard.setShowExportModal(false)}
+        isOpen={modalStore.activeModal === 'EXPORT' || dashboard.showExportModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowExportModal(false)
+        }}
         recordCount={dashboard.filteredTransactions.length}
         onExportExcel={() => {
           exportToExcel(dashboard.filteredTransactions)
+          modalStore.closeModal()
           dashboard.setShowExportModal(false)
         }}
         onExportCSV={() => {
           exportToCSV(dashboard.filteredTransactions)
+          modalStore.closeModal()
           dashboard.setShowExportModal(false)
         }}
         onExportPDF={() => {
@@ -203,45 +158,61 @@ function DashboardPage() {
             dashboard.categoryBreakdownData,
             label
           )
+          modalStore.closeModal()
           dashboard.setShowExportModal(false)
         }}
       />
 
       <WhatsAppSettingsModal
-        isOpen={dashboard.showWhatsAppModal}
-        onClose={() => dashboard.setShowWhatsAppModal(false)}
+        isOpen={modalStore.activeModal === 'WHATSAPP_SETTINGS' || dashboard.showWhatsAppModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowWhatsAppModal(false)
+        }}
         currentPhoneNumber={dashboard.userPhoneNumber}
         userId={dashboard.user.id}
         onPhoneUpdated={(newPhone) => dashboard.setUserPhoneNumber(newPhone)}
       />
 
       <BankStatementImportModal
-        isOpen={dashboard.showBankImportModal}
-        onClose={() => dashboard.setShowBankImportModal(false)}
+        isOpen={modalStore.activeModal === 'BANK_IMPORT' || dashboard.showBankImportModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowBankImportModal(false)
+        }}
         categories={dashboard.categories}
         onImportTransactions={dashboard.handleImportBankTransactions}
       />
 
       <CategoryBudgetModal
-        isOpen={dashboard.showBudgetModal}
-        onClose={() => dashboard.setShowBudgetModal(false)}
+        isOpen={modalStore.activeModal === 'CATEGORY_BUDGET' || dashboard.showBudgetModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowBudgetModal(false)
+        }}
         categories={dashboard.categories}
         onSaveBudgets={dashboard.handleSaveCategoryBudgets}
       />
 
       <SavingsGoalModal
-        isOpen={dashboard.showSavingsGoalModal}
-        onClose={() => dashboard.setShowSavingsGoalModal(false)}
-        mode={dashboard.savingsGoalModalMode}
-        targetGoal={dashboard.targetDepositGoal}
+        isOpen={modalStore.activeModal === 'SAVINGS_GOAL' || dashboard.showSavingsGoalModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowSavingsGoalModal(false)
+        }}
+        mode={modalStore.activeModal === 'SAVINGS_GOAL' ? modalStore.savingsGoalMode : dashboard.savingsGoalModalMode}
+        targetGoal={modalStore.activeModal === 'SAVINGS_GOAL' ? modalStore.targetGoal : dashboard.targetDepositGoal}
         onCreateGoal={dashboard.handleCreateSavingsGoal}
         onUpdateGoal={dashboard.handleUpdateSavingsGoal}
         onDeleteGoal={dashboard.handleDeleteSavingsGoal}
         onDepositGoal={dashboard.handleDepositSavingsGoal}
       />
       <GoogleSheetsSyncModal
-        isOpen={dashboard.showGoogleSheetsModal}
-        onClose={() => dashboard.setShowGoogleSheetsModal(false)}
+        isOpen={modalStore.activeModal === 'GOOGLE_SHEETS' || dashboard.showGoogleSheetsModal}
+        onClose={() => {
+          modalStore.closeModal()
+          dashboard.setShowGoogleSheetsModal(false)
+        }}
         googleSheetsId={dashboard.googleSheetsId}
         transactions={dashboard.transactions}
         onSaveSheetId={async (newId) => {
@@ -251,13 +222,14 @@ function DashboardPage() {
       />
 
       <RecurringTransactionModal
-        isOpen={dashboard.showRecurringModal}
+        isOpen={modalStore.activeModal === 'RECURRING_TRANSACTION' || dashboard.showRecurringModal}
         onClose={() => {
+          modalStore.closeModal()
           dashboard.setShowRecurringModal(false)
           dashboard.setTargetEditRule(null)
         }}
         categories={dashboard.categories}
-        targetRule={dashboard.targetEditRule}
+        targetRule={modalStore.activeModal === 'RECURRING_TRANSACTION' ? modalStore.targetRule : dashboard.targetEditRule}
         onSubmit={dashboard.handleCreateRecurringRule}
         onUpdate={dashboard.handleUpdateRecurringRule}
       />

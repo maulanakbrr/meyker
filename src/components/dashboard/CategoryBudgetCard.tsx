@@ -2,13 +2,17 @@ import { PieChart, AlertTriangle, CheckCircle2, AlertOctagon, Plus, Settings2 } 
 import { Button } from '../ui/button'
 import { formatIdrCurrency } from '../../lib/export'
 import type { CategoryBudgetProgress } from '../../lib/dashboardUtils'
+import { useModalStore } from '../../stores'
 
 interface CategoryBudgetCardProps {
   budgets: CategoryBudgetProgress[]
-  onOpenBudgetModal: () => void
+  onOpenBudgetModal?: () => void
 }
 
 export function CategoryBudgetCard({ budgets = [], onOpenBudgetModal }: CategoryBudgetCardProps) {
+  const modalStore = useModalStore()
+  const handleOpenBudget = onOpenBudgetModal ?? (() => modalStore.openModal('CATEGORY_BUDGET'))
+
   return (
     <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4 flex flex-col justify-start">
       <div className="flex items-center justify-between">
@@ -23,7 +27,7 @@ export function CategoryBudgetCard({ budgets = [], onOpenBudgetModal }: Category
         </div>
 
         <Button
-          onClick={onOpenBudgetModal}
+          onClick={handleOpenBudget}
           variant="outline"
           size="sm"
           leftIcon={<Settings2 className="w-3.5 h-3.5 text-indigo-400" />}
