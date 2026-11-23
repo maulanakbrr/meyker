@@ -6,6 +6,8 @@ import { SocialAuthButtons } from '../components/auth/social-auth-buttons'
 import { Card } from '../components/ui/card'
 import { Divider } from '../components/ui/divider'
 
+import { Button } from '../components/ui/button'
+
 export const Route = createFileRoute('/login')({
   component: LoginPage,
 })
@@ -28,11 +30,25 @@ export function LoginPage() {
     )
   }
 
+  const handleDemoMode = () => {
+    navigate({ to: '/demo' })
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#0b0f19] relative overflow-hidden">
       {/* Background ambient lighting */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="absolute top-6 right-6 z-20 animate-fade-in">
+        <Button 
+          onClick={handleDemoMode}
+          variant="outline"
+          className="bg-indigo-500/10 hover:bg-indigo-600 border-indigo-500/30 hover:border-indigo-500 text-indigo-200 hover:text-white shadow-lg shadow-indigo-500/10 transition-all cursor-pointer text-xs h-8 px-3"
+        >
+          Try Demo Mode
+        </Button>
+      </div>
 
       <div className="w-full max-w-md animate-fade-in relative z-10">
         <Card>

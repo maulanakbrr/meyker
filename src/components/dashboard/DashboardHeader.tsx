@@ -26,9 +26,15 @@ export function DashboardHeader({ user, onSignOut, onNavigateAuth }: DashboardHe
             <div className="flex items-center gap-3 pl-4 border-l border-gray-800">
               <div className="text-right hidden sm:block">
                 <p className="text-xs font-semibold text-white">{user.email}</p>
-                <span className="text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                  Pro Member
-                </span>
+                {user.id === 'demo-user' ? (
+                  <span className="text-[10px] text-amber-400 font-medium bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                    Demo Mode
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-emerald-400 font-medium bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    Pro Member
+                  </span>
+                )}
               </div>
               <Button
                 variant="outline"

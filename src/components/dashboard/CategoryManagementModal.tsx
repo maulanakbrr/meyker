@@ -3,32 +3,36 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
+import { useCategoryFormStore } from '../../stores'
 
 interface CategoryManagementModalProps {
   isOpen: boolean
   onClose: () => void
   onSubmit: (e: React.FormEvent) => void
   categories: Category[]
-  catName: string
-  setCatName: (name: string) => void
-  catType: TransactionType
-  setCatType: (type: TransactionType) => void
-  catColor: string
-  setCatColor: (color: string) => void
+  catName?: string
+  setCatName?: (name: string) => void
+  catType?: TransactionType
+  setCatType?: (type: TransactionType) => void
+  catColor?: string
+  setCatColor?: (color: string) => void
 }
 
-export function CategoryManagementModal({
-  isOpen,
-  onClose,
-  onSubmit,
-  categories,
-  catName,
-  setCatName,
-  catType,
-  setCatType,
-  catColor,
-  setCatColor,
-}: CategoryManagementModalProps) {
+export function CategoryManagementModal(props: CategoryManagementModalProps) {
+  const formStore = useCategoryFormStore()
+
+  const {
+    isOpen,
+    onClose,
+    onSubmit,
+    categories,
+    catName = formStore.name,
+    setCatName = formStore.setName,
+    catType = formStore.type,
+    setCatType = formStore.setType,
+    catColor = formStore.color,
+    setCatColor = formStore.setColor,
+  } = props
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-lg bg-gray-950 text-white border-gray-800 space-y-4">

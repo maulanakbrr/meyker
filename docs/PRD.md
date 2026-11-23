@@ -47,17 +47,27 @@
 - **Real-time DB Synchronization**:
   - Instant Supabase DB entry logging (`source = 'WHATSAPP'`) and WhatsApp TwiML/Qiscus confirmation reply.
 
-### Phase 3: Imports, Advanced Sync & Reports (In Progress)
+### Phase 3: Imports, Advanced Sync & Reports (Completed)
 - **File Import Engine (Completed)**:
   - Bulk import from external bank statement CSV/Excel files with bank format auto-detection (BCA, Mandiri, BRI, CIMB, Generic) and interactive column mapping UI.
 - **Monthly PDF Reports (Completed)**:
   - Automated client-side PDF export for branded monthly financial statements, KPI metrics, category breakdowns, and tax summaries (`jsPDF` + `jspdf-autotable`).
-- **Live Sync with Google Sheets API**:
-  - Two-way live synchronization using Google Sheets API (OAuth2).
+- **Live Sync with Google Sheets API (Completed)**:
+  - One-way live synchronization pushing transaction records directly to Google Sheets using Google Sheets API (OAuth2).
 - **Savings Goals & Category Budgets (Completed)**:
   - Monthly spending caps per category with visual health bars and personal savings goals tracker with quick deposit contribution support.
 - **Recurring Transactions & Subscriptions (Completed)**:
   - Automated recurring income and expense rules with custom frequencies (`DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`), active subscription management, rule editing, Radix Dialog modals, and reusable single-date picker.
+
+### Phase 4: Advanced UX, State Architecture & Modularization (Completed)
+- **Dashboard Toolbar UX Refactoring**:
+  - Unified action buttons into consolidated Popover menus (`Data & Sync` and `More`) with clean visual hierarchy.
+- **Interactive Demo Mode Showcase**:
+  - Dedicated `/demo` route with realistic mock financial datasets, metrics, and instant preview without requiring Supabase auth.
+- **Modular Zustand Stores**:
+  - Encapsulate form draft states (`useTransactionFormStore`, `useCategoryFormStore`) inside isolated form stores to eliminate keystroke re-renders.
+  - Centralize dialog management with `useModalStore` to replace prop-drilled modal toggles and consolidate 12+ dashboard control callbacks.
+  - Decompose monolithic business logic in `useDashboard.ts` into domain stores (`useAuthStore`, `useFilterStore`, `useFinanceStore`).
 
 ---
 
@@ -70,10 +80,12 @@
 
 ### Tech Stack
 - **Frontend**: React + TanStack Start (SSR / routing), Tailwind CSS, shadcn UI / modern component patterns.
+- **State Management**: Zustand (modular domain and isolated form stores).
 - **Database / Backend**: PostgreSQL via Supabase (Auth, Row Level Security, DB Host).
 - **ORM**: Drizzle ORM (`drizzle-orm`, `drizzle-kit`).
 - **Export Engine**: ExcelJS for `.xlsx` and CSV generation.
 - **Icons & Visualization**: Lucide React & Recharts / Custom SVG Charts.
+- **Testing**: Vitest + React Testing Library + jsdom.
 - **CI/CD**: GitHub Actions workflow (`.github/workflows/ci.yml`).
 
 ### Database Schema Definition (PostgreSQL / Drizzle ORM)
