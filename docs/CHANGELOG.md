@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - Unreleased
 
-### 🏗️ Planned / In Progress (Phase 4: State Architecture & Performance Refactoring)
+### 🎉 Added (Phase 4: State Architecture, Performance & UX)
+- **Interactive Demo Mode Showcase (`/demo`)**:
+  - Instant live preview mode available on login and dashboard with pre-populated sample transactions, visual metrics, categories, budgets, and savings goals without requiring Supabase credentials.
+- **Consolidated Dashboard Toolbar UX**:
+  - Refactored 10 scattered multi-color action buttons into unified Radix Popover menus (`Data & Sync` and `More`) with sleek dark aesthetic and clean hierarchy.
 - **Zustand State Architecture Migration**:
   - Transition from monolithic `useDashboard.ts` hook (~1,100 lines) to modular, domain-specific Zustand stores.
 - **Form State Stores (`src/stores/forms/`)**:
