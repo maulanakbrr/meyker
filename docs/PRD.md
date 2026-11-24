@@ -69,6 +69,20 @@
   - Centralize dialog management with `useModalStore` to replace prop-drilled modal toggles and consolidate 12+ dashboard control callbacks.
   - Decompose monolithic business logic in `useDashboard.ts` into domain stores (`useAuthStore`, `useFilterStore`, `useFinanceStore`).
 
+### Phase 5: Telegram Automation, Granular Tagging & AI Financial Advisor (Current Scope)
+- **Telegram Bot Automation Engine**:
+  - Clean replacement of WhatsApp/Twilio integration with Telegram Bot API (`grammY`).
+  - Zero-friction one-click account pairing via deep link (`/start bind_<token>`).
+  - Natural language transaction logging with hashtag support and Gemini Vision OCR receipt scanning with interactive inline keyboard confirmation.
+  - Bot command suite: `/saldo`, `/budget`, `/rekap`, `/batal`, and `/advisor`.
+- **Granular Transaction Tags (`#tag`)**:
+  - PostgreSQL array column `tags: text[]` with GIN indexing.
+  - Interactive tag input with autocomplete from user's historical tags.
+  - Multi-tag filtering support in web dashboard controls and store.
+- **On-Demand AI Spending Advisor & Cashflow Forecast**:
+  - Google Gemini Flash structured output analysis triggered on-demand via Web button and Telegram `/advisor`.
+  - Financial Health Score (1–100), anomaly detection, actionable tips, and 30-day projected cashflow balance.
+
 ---
 
 ## 4. Scope Guardrails & Backlog Management

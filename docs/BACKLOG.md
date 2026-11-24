@@ -49,9 +49,28 @@ This document tracks future feature ideas, operational notes, and roadmap items.
 
 ---
 
+## 🚀 Phase 5: Telegram Automation, Granular Tagging & AI Financial Advisor (Planned Scope)
+- [ ] **Telegram Bot Automation Engine (Clean WhatsApp Replacement)**:
+  - [ ] Deprecate and remove WhatsApp modules (`whatsappAdapter`, `whatsappWebhookService`, Twilio/Qiscus dependencies).
+  - [ ] Implement `grammY` Telegram bot integration via webhook endpoint (`/api/telegram`).
+  - [ ] One-click account pairing via deep link (`https://t.me/MeykerBot?start=bind_<TOKEN>`).
+  - [ ] Natural language transaction logging with hashtag support (e.g., `"45k kopi susu #nongkrong"`).
+  - [ ] Instant receipt scanning (Google Gemini Vision OCR) with interactive Inline Keyboard confirmation (`[Simpan]`, `[Ubah Kategori]`, `[Batal]`).
+  - [ ] Quick command suite: `/saldo` (current balance & monthly summary), `/budget` (category spending health), `/rekap` (weekly/monthly digest), and `/batal` (undo last entry).
+- [ ] **Transaction Tags & Granular Labels (`#tag`)**:
+  - [ ] Database migration: Add `tags: text[]` column with PostgreSQL GIN index on `transactions` table.
+  - [ ] Smart tag input with autocomplete from user's transaction history in `AddTransactionModal`.
+  - [ ] Tag badges display in transaction list table.
+  - [ ] Multi-tag filtering support in `DashboardControls` and `useFilterStore`.
+- [ ] **On-Demand AI Spending Advisor & Cashflow Forecast (Google Gemini)**:
+  - [ ] Data synthesis engine aggregating 30–90 days of transactions, category budgets, and recurring rules.
+  - [ ] Google Gemini Flash structured output generator delivering financial health score (1–100), anomaly detection, actionable savings advice, and 30-day cashflow forecast.
+  - [ ] Web dashboard "AI Financial Advisor" interactive card/modal.
+  - [ ] Telegram bot on-demand command `/advisor` delivering formatted advice directly to chat.
+
+---
+
 ## 💡 Future Backlog Ideas (Unscheduled)
-- [ ] **AI Spending Advisor & Cashflow Forecast**: Google Gemini-powered financial review and budget suggestions.
 - [ ] **Google Sheets Two-Way Sync**: Bi-directional sync pulling remote sheet rows back into Supabase.
-- [ ] **Transaction Tags & Granular Labels**: `#tag` support in manual entry, WhatsApp parser, and dashboard filters.
 - [ ] **Multi-Currency Support**: Per-transaction currency selector with automatic exchange rate conversion.
 - [ ] **Shared Household / Joint Budget Accounts**: Multi-user permissions and shared family/partner expense tracking.

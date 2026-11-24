@@ -5,7 +5,27 @@ All notable changes to the **Meyker Financial Tracker** project will be document
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - Unreleased
+## [0.5.0] - Unreleased
+
+### 🏗️ Planned / In Progress (Phase 5: Telegram Automation, Granular Tagging & AI Financial Advisor)
+- **Telegram Bot Automation Engine**:
+  - Migrate from WhatsApp/Twilio to Telegram Bot API using `grammY`.
+  - Deep-link account pairing (`https://t.me/MeykerBot?start=bind_<token>`).
+  - Natural language text parsing for instant expense/income entries with tag support.
+  - Receipt image scanning via Google Gemini Vision OCR with interactive inline keyboard confirmation.
+  - Command center: `/saldo`, `/budget`, `/rekap`, `/batal`, and `/advisor`.
+- **Transaction Tags & Granular Labels (`#tag`)**:
+  - Add `tags: text[]` column with GIN index on PostgreSQL `transactions` table.
+  - Smart tag input with autocomplete based on past transaction history in `AddTransactionModal`.
+  - Tag badge display in transaction list table and multi-tag filtering in dashboard.
+- **On-Demand AI Spending Advisor & Cashflow Forecast**:
+  - Data synthesis engine analyzing 30–90 days of transactions, category budgets, and recurring rules.
+  - Google Gemini structured JSON analysis producing Health Score, anomaly detection, budget tips, and 30-day cashflow forecast.
+  - Web dashboard "AI Financial Advisor" interactive widget and Telegram `/advisor` command.
+
+---
+
+## [0.4.0] - 2026-11-24
 
 ### 🎉 Added (Phase 4: State Architecture, Performance & UX)
 - **Interactive Demo Mode Showcase (`/demo`)**:

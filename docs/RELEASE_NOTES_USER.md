@@ -1,3 +1,27 @@
+# 🎉 What's New in Meyker! (Version 0.4.0)
+
+Welcome to Meyker v0.4.0! In this update, we’ve completely overhauled the toolbar experience, introduced an interactive Demo Mode showcase, and supercharged the app's responsiveness behind the scenes.
+
+Here is everything new in this release:
+
+### 🎮 Instant Interactive Demo Mode (`/demo`)
+Want to explore Meyker or showcase it without logging in?
+* **Zero-Setup Preview:** Jump straight into `/demo` from the login screen or direct link.
+* **Realistic Sample Data:** Explore pre-populated transactions, budget health bars, savings goals, and visual charts without connecting to Supabase.
+* **Full Interactivity:** Test out filters, modals, and navigation with complete peace of mind.
+
+### 🎛️ Clean & Sleek Dashboard Toolbar
+Say goodbye to cluttered buttons! We've reorganized all actions into a clean, modern aesthetic:
+* **Data & Sync Menu:** One centralized Radix popover for exporting reports (Excel, CSV, PDF), importing bank statements, and syncing with Google Sheets.
+* **More Actions Menu:** Convenient access to Category Management, Receipt Scanner, Recurring Rules, Category Budgets, and Savings Goals.
+* **Streamlined Mobile View:** Responsive layout designed to look sharp on both desktop and mobile screens.
+
+### ⚡ Blazing Fast Performance & Modular State
+* **Smoother Form Inputs:** We re-architected our state management with **Zustand**. Keystrokes inside transaction and category modals are now isolated and no longer cause unnecessary re-renders across the dashboard and charts.
+* **Rock-Solid Reliability:** 100% test passing coverage across all modal and state workflows.
+
+---
+
 # 🎉 What's New in Meyker! (Version 0.3.0)
 
 We’ve been hard at work making Meyker the best financial tracker for you! Our latest update (v0.3.0) is packed with features designed to save you time and help you hit your financial goals faster. 
