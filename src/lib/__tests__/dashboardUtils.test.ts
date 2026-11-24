@@ -36,6 +36,7 @@ describe('dashboardUtils', () => {
       transactionDate: '2026-07-16T12:00:00.000Z',
       paymentMethod: 'CASH',
       note: 'Groceries',
+      tags: ['groceries', 'monthly'],
       source: 'WEB',
       category: sampleCategories[0],
     },
@@ -107,6 +108,25 @@ describe('dashboardUtils', () => {
       })
       expect(filtered).toHaveLength(1)
       expect(filtered[0].id).toBe('tx-2')
+    })
+
+    it('filters by selectedTags and hashtag search query', () => {
+      const byTag = filterDashboardTransactions(sampleTransactions, {
+        selectedTags: ['groceries'],
+      })
+      expect(byTag).toHaveLength(1)
+      expect(byTag[0].id).toBe('tx-2')
+
+      const byHashSearch = filterDashboardTransactions(sampleTransactions, {
+        searchQuery: '#monthly',
+      })
+      expect(byHashSearch).toHaveLength(1)
+      expect(byHashSearch[0].id).toBe('tx-2')
+
+      const noMatch = filterDashboardTransactions(sampleTransactions, {
+        selectedTags: ['non-existent'],
+      })
+      expect(noMatch).toHaveLength(0)
     })
   })
 })

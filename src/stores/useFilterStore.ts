@@ -7,12 +7,15 @@ export interface FilterState {
   searchQuery: string
   typeFilter: 'ALL' | 'INCOME' | 'EXPENSE'
   categoryFilter: string
+  selectedTags: string[]
 
   setDateRange: (range: DateFilterRange) => void
   setSelectedMonth: (month: string) => void
   setSearchQuery: (query: string) => void
   setTypeFilter: (type: 'ALL' | 'INCOME' | 'EXPENSE') => void
   setCategoryFilter: (category: string) => void
+  setSelectedTags: (tags: string[]) => void
+  toggleTag: (tag: string) => void
   resetFilters: () => void
 }
 
@@ -25,12 +28,24 @@ export const useFilterStore = create<FilterState>((set) => ({
   searchQuery: '',
   typeFilter: 'ALL',
   categoryFilter: 'ALL',
+  selectedTags: [],
 
   setDateRange: (dateRange) => set({ dateRange }),
   setSelectedMonth: (selectedMonth) => set({ selectedMonth }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
   setTypeFilter: (typeFilter) => set({ typeFilter }),
   setCategoryFilter: (categoryFilter) => set({ categoryFilter }),
+  setSelectedTags: (selectedTags) => set({ selectedTags }),
+  toggleTag: (tag) =>
+    set((state) => {
+      const clean = tag.trim().replace(/^#/, '').toLowerCase()
+      const exists = state.selectedTags.includes(clean)
+      return {
+        selectedTags: exists
+          ? state.selectedTags.filter((t) => t !== clean)
+          : [...state.selectedTags, clean],
+      }
+    }),
   resetFilters: () =>
     set({
       dateRange: getDefaultDateRange(),
@@ -38,5 +53,6 @@ export const useFilterStore = create<FilterState>((set) => ({
       searchQuery: '',
       typeFilter: 'ALL',
       categoryFilter: 'ALL',
+      selectedTags: [],
     }),
 }))

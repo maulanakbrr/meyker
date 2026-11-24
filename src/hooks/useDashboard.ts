@@ -159,6 +159,7 @@ export function useDashboard() {
         transactionDate: form.date,
         paymentMethod: form.paymentMethod,
         note: form.note,
+        tags: form.tags,
         userId: auth.user?.id,
         isDemoMode: auth.isDemoMode,
       })

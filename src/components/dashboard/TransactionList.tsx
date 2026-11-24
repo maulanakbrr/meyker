@@ -1,10 +1,11 @@
-import { Search, Tag, Trash2, MessageSquare } from 'lucide-react'
+import { Search, Tag, Trash2, MessageSquare, X } from 'lucide-react'
 import { formatCurrency } from '../../lib/utils'
 import type { Transaction, Category } from '../../types'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
+import { useFilterStore } from '../../stores'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -29,6 +30,8 @@ export function TransactionList({
   onCategoryFilterChange,
   onDeleteTransaction,
 }: TransactionListProps) {
+  const filterStore = useFilterStore()
+  const selectedTags = filterStore.selectedTags || []
   return (
     <div className="glass-panel rounded-2xl border border-white/10 p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -93,6 +96,36 @@ export function TransactionList({
         </div>
       </div>
 
+      {/* Active Tag Filters Bar */}
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 p-2.5 bg-gray-900/60 border border-indigo-500/20 rounded-xl text-xs">
+          <span className="text-gray-400 text-xs font-medium">Filtering by tags:</span>
+          {selectedTags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-indigo-600 text-white font-medium text-xs shadow-sm"
+            >
+              #{tag}
+              <button
+                type="button"
+                onClick={() => filterStore.toggleTag(tag)}
+                className="hover:text-rose-200 cursor-pointer font-bold leading-none ml-1"
+                aria-label={`Remove filter for #${tag}`}
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          <button
+            type="button"
+            onClick={() => filterStore.setSelectedTags([])}
+            className="text-[11px] text-gray-400 hover:text-white underline ml-2 cursor-pointer"
+          >
+            Clear tag filters
+          </button>
+        </div>
+      )}
+
       {/* Transaction Table / List */}
       <div className="overflow-x-auto">
         {transactions.length > 0 ? (
@@ -121,6 +154,28 @@ export function TransactionList({
                       </div>
                       <div>
                         <p className="font-semibold text-white">{tx.note || 'No description'}</p>
+                        {tx.tags && tx.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {tx.tags.map((tag) => {
+                              const isSelected = selectedTags.includes(tag.toLowerCase())
+                              return (
+                                <button
+                                  key={tag}
+                                  type="button"
+                                  onClick={() => filterStore.toggleTag(tag)}
+                                  className={`inline-flex items-center text-[10px] px-1.5 py-0.5 rounded cursor-pointer transition-colors ${
+                                    isSelected
+                                      ? 'bg-indigo-600 text-white font-semibold'
+                                      : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/20'
+                                  }`}
+                                  title={`Filter by #${tag}`}
+                                >
+                                  #{tag}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>

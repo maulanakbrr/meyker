@@ -13,6 +13,7 @@ describe('useTransactionFormStore', () => {
     expect(state.categoryId).toBe('')
     expect(state.paymentMethod).toBe('CASH')
     expect(state.note).toBe('')
+    expect(state.tags).toEqual([])
   })
 
   it('updates individual fields', () => {
@@ -23,6 +24,8 @@ describe('useTransactionFormStore', () => {
     store.setDate('2026-09-21')
     store.setPaymentMethod('BANK_TRANSFER')
     store.setNote('Monthly Salary')
+    store.addTag('salary')
+    store.addTag('#bonus')
 
     const updated = useTransactionFormStore.getState()
     expect(updated.amount).toBe('50000')
@@ -31,6 +34,10 @@ describe('useTransactionFormStore', () => {
     expect(updated.date).toBe('2026-09-21')
     expect(updated.paymentMethod).toBe('BANK_TRANSFER')
     expect(updated.note).toBe('Monthly Salary')
+    expect(updated.tags).toEqual(['salary', 'bonus'])
+
+    store.removeTag('salary')
+    expect(useTransactionFormStore.getState().tags).toEqual(['bonus'])
   })
 
   it('prefills form via setFormData (for receipt scanning)', () => {

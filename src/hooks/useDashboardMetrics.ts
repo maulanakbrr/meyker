@@ -17,6 +17,7 @@ export function useDashboardMetrics() {
   const searchQuery = useFilterStore((state) => state.searchQuery)
   const typeFilter = useFilterStore((state) => state.typeFilter)
   const categoryFilter = useFilterStore((state) => state.categoryFilter)
+  const selectedTags = useFilterStore((state) => state.selectedTags)
 
   const filteredTransactions = useMemo(
     () =>
@@ -26,8 +27,9 @@ export function useDashboardMetrics() {
         typeFilter,
         categoryFilter,
         searchQuery,
+        selectedTags,
       }),
-    [transactions, dateRange, selectedMonth, typeFilter, categoryFilter, searchQuery]
+    [transactions, dateRange, selectedMonth, typeFilter, categoryFilter, searchQuery, selectedTags]
   )
 
   const stats = useMemo(

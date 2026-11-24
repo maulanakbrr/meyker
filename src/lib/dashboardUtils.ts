@@ -128,16 +128,24 @@ export interface TransactionFilterOptions {
   typeFilter?: 'ALL' | 'INCOME' | 'EXPENSE' | string
   categoryFilter?: string
   searchQuery?: string
+  selectedTags?: string[]
 }
 
 /**
- * Filter transactions based on date range / month, type, category, and search query
+ * Filter transactions based on date range / month, type, category, search query, and tags
  */
 export function filterDashboardTransactions(
   transactions: Transaction[],
   filters: TransactionFilterOptions
 ): Transaction[] {
-  const { selectedMonth, dateRange, typeFilter = 'ALL', categoryFilter = 'ALL', searchQuery = '' } = filters
+  const {
+    selectedMonth,
+    dateRange,
+    typeFilter = 'ALL',
+    categoryFilter = 'ALL',
+    searchQuery = '',
+    selectedTags = [],
+  } = filters
 
   return transactions.filter((tx) => {
     if (dateRange) {
@@ -149,11 +157,18 @@ export function filterDashboardTransactions(
     if (typeFilter !== 'ALL' && tx.type !== typeFilter) return false
     if (categoryFilter !== 'ALL' && tx.categoryId !== categoryFilter) return false
 
+    if (selectedTags && selectedTags.length > 0) {
+      if (!tx.tags || !selectedTags.every((st) => tx.tags?.map((t) => t.toLowerCase()).includes(st.toLowerCase()))) {
+        return false
+      }
+    }
+
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase()
+      const q = searchQuery.toLowerCase().trim()
       const matchNote = tx.note?.toLowerCase().includes(q)
       const matchCat = tx.category?.name.toLowerCase().includes(q)
-      if (!matchNote && !matchCat) return false
+      const matchTag = tx.tags?.some((t) => `#${t.toLowerCase()}`.includes(q) || t.toLowerCase().includes(q.replace(/^#/, '')))
+      if (!matchNote && !matchCat && !matchTag) return false
     }
 
     return true

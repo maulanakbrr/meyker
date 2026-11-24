@@ -33,6 +33,8 @@ export interface FinanceState {
   loadLocalFallback: () => void
   fetchUserData: (userId: string) => Promise<void>
 
+  getAllTags: () => string[]
+
   createTransaction: (tx: {
     amount: number
     type: TransactionType
@@ -40,6 +42,7 @@ export interface FinanceState {
     transactionDate: string
     paymentMethod: PaymentMethod
     note?: string
+    tags?: string[]
     userId?: string
     isDemoMode?: boolean
   }) => Promise<void>
@@ -292,6 +295,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
             transactionDate: t.transaction_date,
             paymentMethod: t.payment_method,
             note: t.note,
+            tags: Array.isArray(t.tags) ? t.tags : [],
             source: t.source,
             category: matchedCat,
           }
@@ -305,6 +309,19 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     }
   },
 
+  getAllTags: () => {
+    const setTags = new Set<string>()
+    get().transactions.forEach((tx) => {
+      if (Array.isArray(tx.tags)) {
+        tx.tags.forEach((t) => {
+          const clean = t.trim().replace(/^#/, '').toLowerCase()
+          if (clean) setTags.add(clean)
+        })
+      }
+    })
+    return Array.from(setTags).sort()
+  },
+
   createTransaction: async ({
     amount,
     type,
@@ -312,11 +329,13 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
     transactionDate,
     paymentMethod,
     note,
+    tags,
     userId,
     isDemoMode,
   }) => {
     const categories = get().categories
     const selectedCat = categories.find((c) => c.id === categoryId) || null
+    const cleanTags = (tags || []).map((t) => t.trim().replace(/^#/, '').toLowerCase()).filter(Boolean)
 
     const newTx: Transaction = {
       id: `tx-${Date.now()}`,
@@ -327,6 +346,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
       transactionDate: new Date(transactionDate).toISOString(),
       paymentMethod,
       note: note || null,
+      tags: cleanTags,
       source: 'WEB',
       category: selectedCat,
     }
@@ -343,6 +363,7 @@ export const useFinanceStore = create<FinanceState>((set, get) => ({
             transaction_date: new Date(transactionDate).toISOString(),
             payment_method: paymentMethod,
             note: note || null,
+            tags: cleanTags,
             source: 'WEB',
           },
         ])

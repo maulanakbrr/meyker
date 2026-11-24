@@ -35,11 +35,14 @@ export const profiles = pgTable(
     avatarUrl: text('avatar_url'),
     phoneNumber: text('phone_number').unique(),
     googleSheetsId: text('google_sheets_id'),
+    telegramChatId: text('telegram_chat_id').unique(),
+    telegramUsername: text('telegram_username'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index('idx_profiles_phone').on(table.phoneNumber),
+    index('idx_profiles_telegram').on(table.telegramChatId),
   ]
 )
 
@@ -118,6 +121,7 @@ export const transactions = pgTable(
     transactionDate: timestamp('transaction_date', { withTimezone: true }).notNull(),
     paymentMethod: paymentMethodEnum('payment_method').default('CASH').notNull(),
     note: text('note'),
+    tags: text('tags').array(),
     source: transactionSourceEnum('source').default('WEB').notNull(), // WEB | WHATSAPP | IMPORT
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),

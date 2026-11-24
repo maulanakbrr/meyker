@@ -33,6 +33,7 @@ describe('useFinanceStore', () => {
       transactionDate: '2026-09-21',
       paymentMethod: 'CASH',
       note: 'Lunch',
+      tags: ['food', '#work'],
       isDemoMode: true,
     })
 
@@ -40,6 +41,8 @@ describe('useFinanceStore', () => {
     expect(state.transactions.length).toBe(1)
     expect(state.transactions[0].amount).toBe(50000)
     expect(state.transactions[0].category?.name).toBe('Food')
+    expect(state.transactions[0].tags).toEqual(['food', 'work'])
+    expect(useFinanceStore.getState().getAllTags()).toEqual(['food', 'work'])
 
     const txId = state.transactions[0].id
     await useFinanceStore.getState().deleteTransaction(txId, undefined, true)

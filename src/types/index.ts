@@ -55,6 +55,7 @@ export interface Transaction {
   transactionDate: string // ISO string date
   paymentMethod: PaymentMethod
   note?: string | null
+  tags?: string[]
   source: TransactionSource
   createdAt?: string
   updatedAt?: string
@@ -95,4 +96,6 @@ export interface UserProfile {
   fullName?: string
   avatarUrl?: string
   phoneNumber?: string | null
+  telegramChatId?: string | null
+  telegramUsername?: string | null
 }
